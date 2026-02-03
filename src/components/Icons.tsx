@@ -1,0 +1,59 @@
+import { Hospital, Ambulance, Shield, Flame, Heart, Droplets, Phone, MapPin, Navigation, Star, Clock, User, LogOut, Menu, X, Search, ChevronRight, AlertTriangle, Check, Loader2 } from 'lucide-react';
+import { ServiceCategory } from '@/types';
+
+export const Icons = {
+  Hospital,
+  Ambulance,
+  Shield,
+  Flame,
+  Heart,
+  Droplets,
+  Phone,
+  MapPin,
+  Navigation,
+  Star,
+  Clock,
+  User,
+  LogOut,
+  Menu,
+  X,
+  Search,
+  ChevronRight,
+  AlertTriangle,
+  Check,
+  Loader2,
+} as const;
+
+export function getCategoryIcon(category: ServiceCategory) {
+  switch (category) {
+    case 'hospital':
+      return Hospital;
+    case 'ambulance':
+      return Ambulance;
+    case 'police':
+      return Shield;
+    case 'fire':
+      return Flame;
+    case 'ngo':
+      return Heart;
+    default:
+      return MapPin;
+  }
+}
+
+export function getCategoryColor(category: ServiceCategory): string {
+  switch (category) {
+    case 'hospital':
+      return 'bg-hospital text-white';
+    case 'ambulance':
+      return 'bg-ambulance text-white';
+    case 'police':
+      return 'bg-police text-white';
+    case 'fire':
+      return 'bg-fire text-white';
+    case 'ngo':
+      return 'bg-ngo text-white';
+    default:
+      return 'bg-primary text-primary-foreground';
+  }
+}
