@@ -9,6 +9,10 @@ import BloodDonors from "./pages/BloodDonors";
 import Auth from "./pages/Auth";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import AdminUsers from "./pages/admin/AdminUsers";
+import AdminDonors from "./pages/admin/AdminDonors";
+import AdminServices from "./pages/admin/AdminServices";
 
 const queryClient = new QueryClient();
 
@@ -24,6 +28,11 @@ const App = () => (
           <Route path="/blood-donors" element={<BloodDonors />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/profile" element={<Profile />} />
+          {/* Admin Routes */}
+          <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/admin/users" element={<AdminUsers />} />
+          <Route path="/admin/donors" element={<AdminDonors />} />
+          <Route path="/admin/services" element={<AdminServices />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
