@@ -3,12 +3,15 @@ import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Icons } from '@/components/Icons';
 import { useAuth } from '@/hooks/useAuth';
+import { useAdmin } from '@/hooks/useAdmin';
 import { useState } from 'react';
+import { Settings } from 'lucide-react';
 
 export function Header() {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
+  const { isAdmin } = useAdmin();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const handleSignOut = async () => {
@@ -52,6 +55,14 @@ export function Header() {
 
         {/* Desktop Auth */}
         <div className="hidden md:flex items-center gap-2">
+          {isAdmin && (
+            <Button variant="outline" size="sm" asChild>
+              <Link to="/admin">
+                <Settings className="h-4 w-4 mr-2" />
+                Admin
+              </Link>
+            </Button>
+          )}
           {user ? (
             <>
               <Button variant="ghost" size="sm" asChild>
@@ -93,6 +104,16 @@ export function Header() {
                   {link.label}
                 </Link>
               ))}
+              {isAdmin && (
+                <Link
+                  to="/admin"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="text-lg font-medium hover:text-primary flex items-center gap-2"
+                >
+                  <Settings className="h-5 w-5" />
+                  Admin Panel
+                </Link>
+              )}
               <hr className="my-2" />
               {user ? (
                 <>
