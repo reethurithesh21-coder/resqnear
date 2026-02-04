@@ -33,6 +33,21 @@ const Index = () => {
           />
         </section>
 
+        {/* One Tap Emergency Connect */}
+        <section className="flex justify-center">
+          <button
+            onClick={() => window.location.href = 'tel:112'}
+            className="group relative flex flex-col items-center justify-center w-40 h-40 md:w-48 md:h-48 rounded-full bg-gradient-to-br from-emergency to-emergency/80 shadow-2xl hover:shadow-emergency/40 transition-all duration-300 hover:scale-105 active:scale-95"
+          >
+            <div className="absolute inset-0 rounded-full bg-emergency/20 animate-ping" />
+            <div className="absolute inset-2 rounded-full bg-gradient-to-br from-emergency to-emergency/90 flex flex-col items-center justify-center">
+              <Icons.Phone className="h-12 w-12 md:h-14 md:w-14 text-white mb-2" />
+              <span className="text-white font-bold text-lg md:text-xl">ONE TAP</span>
+              <span className="text-white/80 text-xs md:text-sm">Local Help Assist</span>
+            </div>
+          </button>
+        </section>
+
         {/* Emergency Banner */}
         <EmergencyBanner />
 
