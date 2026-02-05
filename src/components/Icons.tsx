@@ -1,4 +1,4 @@
-import { Hospital, Ambulance, Shield, Flame, Heart, Droplets, Phone, MapPin, Navigation, Star, Clock, User, LogOut, Menu, X, Search, ChevronRight, AlertTriangle, Check, Loader2 } from 'lucide-react';
+import { Hospital, Ambulance, Shield, Flame, Heart, Droplets, Phone, MapPin, Navigation, Star, Clock, User, LogOut, Menu, X, Search, ChevronRight, AlertTriangle, Check, Loader2, Plus, Minus } from 'lucide-react';
 import { ServiceCategory } from '@/types';
 
 export const Icons = {
@@ -22,6 +22,8 @@ export const Icons = {
   AlertTriangle,
   Check,
   Loader2,
+  Plus,
+  Minus,
 } as const;
 
 export function getCategoryIcon(category: ServiceCategory) {

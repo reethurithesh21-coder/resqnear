@@ -4,6 +4,7 @@ import { Header } from '@/components/Header';
 import { CategoryGrid } from '@/components/CategoryGrid';
 import { ServiceCard } from '@/components/ServiceCard';
 import { LocationStatus } from '@/components/LocationStatus';
+import { MapPlaceholder } from '@/components/MapPlaceholder';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Icons } from '@/components/Icons';
@@ -103,6 +104,14 @@ const Search = () => {
         {/* Search & Results */}
         {selectedCategory && (
           <section className="space-y-4">
+            {/* Map View */}
+            <MapPlaceholder 
+              services={filteredServices}
+              userLat={latitude}
+              userLng={longitude}
+              className="h-64 md:h-80"
+            />
+
             <div className="flex gap-3">
               <div className="relative flex-1">
                 <Icons.Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -126,6 +135,10 @@ const Search = () => {
               <div className="text-center py-12 text-muted-foreground">
                 <Icons.MapPin className="h-12 w-12 mx-auto mb-4 opacity-50" />
                 <p>Enable location to find services near you</p>
+                <Button variant="outline" className="mt-4" onClick={refresh}>
+                  <Icons.MapPin className="h-4 w-4 mr-2" />
+                  Enable Location
+                </Button>
               </div>
             ) : filteredServices.length === 0 ? (
               <div className="text-center py-12 text-muted-foreground">
