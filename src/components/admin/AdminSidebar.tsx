@@ -9,6 +9,7 @@ const navItems = [
   { title: 'Users & Profiles', url: '/admin/users', icon: Users },
   { title: 'Blood Donors', url: '/admin/donors', icon: Droplets },
   { title: 'Emergency Services', url: '/admin/services', icon: Building2 },
+  { title: 'Settings', url: '/admin/settings', icon: Settings },
 ];
 
 export function AdminSidebar() {
