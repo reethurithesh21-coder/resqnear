@@ -24,6 +24,7 @@ export function Header() {
     { href: '/', label: 'Home' },
     { href: '/search', label: 'Find Services' },
     { href: '/blood-donors', label: 'Blood Donors' },
+    ...(user ? [{ href: '/dashboard', label: 'Dashboard' }] : []),
   ];
 
   const isActive = (path: string) => location.pathname === path;
