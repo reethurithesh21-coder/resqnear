@@ -4,7 +4,7 @@ import { Header } from '@/components/Header';
 import { CategoryGrid } from '@/components/CategoryGrid';
 import { ServiceCard } from '@/components/ServiceCard';
 import { LocationStatus } from '@/components/LocationStatus';
-import { MapPlaceholder } from '@/components/MapPlaceholder';
+import { GoogleMap } from '@/components/GoogleMap';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Icons } from '@/components/Icons';
@@ -105,7 +105,7 @@ const Search = () => {
         {selectedCategory && (
           <section className="space-y-4">
             {/* Map View */}
-            <MapPlaceholder 
+            <GoogleMap 
               services={filteredServices}
               userLat={latitude}
               userLng={longitude}
