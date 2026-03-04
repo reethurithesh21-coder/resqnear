@@ -51,7 +51,7 @@ const Search = () => {
               latitude,
               longitude,
               category: selectedCategory,
-              radius: 5000,
+              radius: parseInt(radius),
             },
           });
 
