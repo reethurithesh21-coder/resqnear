@@ -67,7 +67,7 @@ const Search = () => {
       };
       fetchServices();
     }
-  }, [selectedCategory, hasLocation, latitude, longitude]);
+  }, [selectedCategory, hasLocation, latitude, longitude, radius]);
 
   const handleCategorySelect = (category: ServiceCategory) => {
     setSelectedCategory(category);
