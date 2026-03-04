@@ -125,6 +125,18 @@ const Search = () => {
                   className="pl-10"
                 />
               </div>
+              <Select value={radius} onValueChange={setRadius}>
+                <SelectTrigger className="w-[100px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {RADIUS_OPTIONS.map((opt) => (
+                    <SelectItem key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               <Button variant="outline" size="icon" onClick={refresh}>
                 <Icons.MapPin className="h-4 w-4" />
               </Button>
