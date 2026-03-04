@@ -9,32 +9,9 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Icons } from '@/components/Icons';
 import { useGeolocation } from '@/hooks/useGeolocation';
+import { supabase } from '@/integrations/supabase/client';
 import { EmergencyService, ServiceCategory, SERVICE_CATEGORIES } from '@/types';
-
-// Mock data for demonstration - in production, this would come from Google Places API
-const generateMockServices = (category: ServiceCategory, lat: number, lng: number): EmergencyService[] => {
-  const categoryInfo = SERVICE_CATEGORIES.find(c => c.id === category);
-  const names: Record<ServiceCategory, string[]> = {
-    hospital: ['City General Hospital', 'Metro Medical Center', 'Community Health Hospital', 'Regional Medical Center', 'Emergency Care Hospital'],
-    ambulance: ['24/7 Ambulance Service', 'Metro Emergency Response', 'City Ambulance', 'Quick Response Ambulance', 'Medical Transport Services'],
-    police: ['Central Police Station', 'Metro Police Department', 'City Police Headquarters', 'District Police Office', 'Community Police Station'],
-    fire: ['Central Fire Station', 'Metro Fire Department', 'City Fire & Rescue', 'District Fire Station', 'Emergency Fire Services'],
-    ngo: ['Red Cross Chapter', 'Community Aid Foundation', 'Helping Hands NGO', 'Relief Foundation', 'Care & Support Center'],
-  };
-
-  return names[category].map((name, index) => ({
-    place_id: `${category}_${index}`,
-    name,
-    address: `${100 + index * 50} Main Street, City Center`,
-    phone: `+1-555-${String(100 + index).padStart(3, '0')}-${String(1000 + index * 111).slice(0, 4)}`,
-    latitude: lat + (Math.random() - 0.5) * 0.05,
-    longitude: lng + (Math.random() - 0.5) * 0.05,
-    distance: Math.random() * 5,
-    rating: 3.5 + Math.random() * 1.5,
-    category,
-    isOpen: Math.random() > 0.2,
-  })).sort((a, b) => (a.distance || 0) - (b.distance || 0));
-};
+import { toast } from 'sonner';
 
 const Search = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -58,11 +35,28 @@ const Search = () => {
   useEffect(() => {
     if (selectedCategory && hasLocation) {
       setLoading(true);
-      // Simulate API call - in production, this would be Google Places API
-      setTimeout(() => {
-        setServices(generateMockServices(selectedCategory, latitude!, longitude!));
-        setLoading(false);
-      }, 500);
+      const fetchServices = async () => {
+        try {
+          const { data, error } = await supabase.functions.invoke('search-places', {
+            body: {
+              latitude,
+              longitude,
+              category: selectedCategory,
+              radius: 5000,
+            },
+          });
+
+          if (error) throw error;
+          setServices(data?.services || []);
+        } catch (err: any) {
+          console.error('Failed to fetch services:', err);
+          toast.error('Failed to fetch nearby services. Please try again.');
+          setServices([]);
+        } finally {
+          setLoading(false);
+        }
+      };
+      fetchServices();
     }
   }, [selectedCategory, hasLocation, latitude, longitude]);
 
