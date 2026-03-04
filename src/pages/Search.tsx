@@ -7,11 +7,19 @@ import { LocationStatus } from '@/components/LocationStatus';
 import { GoogleMap } from '@/components/GoogleMap';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Icons } from '@/components/Icons';
 import { useGeolocation } from '@/hooks/useGeolocation';
 import { supabase } from '@/integrations/supabase/client';
 import { EmergencyService, ServiceCategory, SERVICE_CATEGORIES } from '@/types';
 import { toast } from 'sonner';
+
+const RADIUS_OPTIONS = [
+  { value: '1000', label: '1 km' },
+  { value: '5000', label: '5 km' },
+  { value: '10000', label: '10 km' },
+  { value: '25000', label: '25 km' },
+];
 
 const Search = () => {
   const [searchParams, setSearchParams] = useSearchParams();
