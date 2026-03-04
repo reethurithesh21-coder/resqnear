@@ -29,6 +29,7 @@ const Search = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [services, setServices] = useState<EmergencyService[]>([]);
   const [loading, setLoading] = useState(false);
+  const [radius, setRadius] = useState('5000');
   
   const { latitude, longitude, loading: locationLoading, error: locationError, refresh } = useGeolocation();
   const hasLocation = latitude !== null && longitude !== null;
