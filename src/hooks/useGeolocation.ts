@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 
 interface LocationState {
   latitude: number | null;
@@ -7,13 +7,14 @@ interface LocationState {
   loading: boolean;
 }
 
-export function useGeolocation() {
+export function useGeolocation(enableWatch = false) {
   const [location, setLocation] = useState<LocationState>({
     latitude: null,
     longitude: null,
     error: null,
     loading: true,
   });
+  const watchIdRef = useRef<number | null>(null);
 
   const requestLocation = useCallback(() => {
     if (!navigator.geolocation) {
@@ -59,10 +60,37 @@ export function useGeolocation() {
       {
         enableHighAccuracy: true,
         timeout: 10000,
-        maximumAge: 300000, // 5 minutes cache
+        maximumAge: 300000,
       }
     );
   }, []);
+
+  // Watch position for live tracking
+  useEffect(() => {
+    if (!enableWatch || !navigator.geolocation) return;
+
+    watchIdRef.current = navigator.geolocation.watchPosition(
+      (position) => {
+        setLocation({
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
+          error: null,
+          loading: false,
+        });
+      },
+      () => {}, // silently ignore watch errors
+      {
+        enableHighAccuracy: true,
+        maximumAge: 5000,
+      }
+    );
+
+    return () => {
+      if (watchIdRef.current !== null) {
+        navigator.geolocation.clearWatch(watchIdRef.current);
+      }
+    };
+  }, [enableWatch]);
 
   useEffect(() => {
     requestLocation();

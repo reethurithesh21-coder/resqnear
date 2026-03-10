@@ -4,7 +4,7 @@ import { Header } from '@/components/Header';
 import { CategoryGrid } from '@/components/CategoryGrid';
 import { ServiceCard } from '@/components/ServiceCard';
 import { LocationStatus } from '@/components/LocationStatus';
-import { GoogleMap } from '@/components/GoogleMap';
+import { LeafletMap } from '@/components/LeafletMap';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -21,6 +21,14 @@ const RADIUS_OPTIONS = [
   { value: '25000', label: '25 km' },
 ];
 
+const EMERGENCY_BUTTONS: { category: ServiceCategory; emoji: string; label: string; color: string }[] = [
+  { category: 'ambulance', emoji: '🚑', label: 'Find Ambulance', color: 'bg-ambulance hover:bg-ambulance/90' },
+  { category: 'hospital', emoji: '🏥', label: 'Find Hospital', color: 'bg-hospital hover:bg-hospital/90' },
+  { category: 'police', emoji: '🚓', label: 'Find Police', color: 'bg-police hover:bg-police/90' },
+  { category: 'fire', emoji: '🚒', label: 'Fire Station', color: 'bg-fire hover:bg-fire/90' },
+  { category: 'ngo', emoji: '💚', label: 'Find NGO', color: 'bg-ngo hover:bg-ngo/90' },
+];
+
 const Search = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [selectedCategory, setSelectedCategory] = useState<ServiceCategory | undefined>(
@@ -31,7 +39,7 @@ const Search = () => {
   const [loading, setLoading] = useState(false);
   const [radius, setRadius] = useState('5000');
   
-  const { latitude, longitude, loading: locationLoading, error: locationError, refresh } = useGeolocation();
+  const { latitude, longitude, loading: locationLoading, error: locationError, refresh } = useGeolocation(true);
   const hasLocation = latitude !== null && longitude !== null;
 
   useEffect(() => {
@@ -94,9 +102,39 @@ const Search = () => {
           />
         </div>
 
-        {/* Category Selection */}
+        {/* Search Bar */}
+        <div className="relative max-w-2xl mx-auto">
+          <Icons.Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+          <Input
+            placeholder="Search hospitals, police stations, blood banks..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-12 h-12 text-base rounded-full border-2 border-border focus-visible:ring-primary shadow-sm"
+          />
+        </div>
+
+        {/* Emergency Quick Action Buttons */}
         <section>
-          <h2 className="text-lg font-semibold mb-3">Select Service Type</h2>
+          <h2 className="text-sm font-semibold text-muted-foreground mb-3 uppercase tracking-wider">Quick Actions</h2>
+          <div className="flex flex-wrap gap-2">
+            {EMERGENCY_BUTTONS.map((btn) => (
+              <button
+                key={btn.category}
+                onClick={() => handleCategorySelect(btn.category)}
+                className={`${btn.color} text-white px-4 py-2.5 rounded-lg font-medium text-sm flex items-center gap-2 transition-all shadow-md hover:shadow-lg active:scale-95 ${
+                  selectedCategory === btn.category ? 'ring-2 ring-offset-2 ring-foreground/30' : ''
+                }`}
+              >
+                <span className="text-lg">{btn.emoji}</span>
+                {btn.label}
+              </button>
+            ))}
+          </div>
+        </section>
+
+        {/* Category Grid */}
+        <section>
+          <h2 className="text-sm font-semibold text-muted-foreground mb-3 uppercase tracking-wider">All Categories</h2>
           <CategoryGrid 
             selectedCategory={selectedCategory} 
             onSelect={handleCategorySelect}
@@ -104,22 +142,24 @@ const Search = () => {
           />
         </section>
 
-        {/* Search & Results */}
+        {/* Map & Results */}
         {selectedCategory && (
           <section className="space-y-4">
             {/* Map View */}
-            <GoogleMap 
+            <LeafletMap 
               services={filteredServices}
               userLat={latitude}
               userLng={longitude}
-              className="h-64 md:h-80"
+              className="h-[500px] md:h-[550px]"
+              onServiceSelect={(s) => console.log('Selected:', s.name)}
             />
 
+            {/* Filters */}
             <div className="flex gap-3">
               <div className="relative flex-1">
                 <Icons.Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="Search by name or address..."
+                  placeholder="Filter results..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-10"
@@ -137,11 +177,12 @@ const Search = () => {
                   ))}
                 </SelectContent>
               </Select>
-              <Button variant="outline" size="icon" onClick={refresh}>
+              <Button variant="outline" size="icon" onClick={refresh} title="Refresh location">
                 <Icons.MapPin className="h-4 w-4" />
               </Button>
             </div>
 
+            {/* Results */}
             {loading ? (
               <div className="flex justify-center py-12">
                 <Icons.Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -173,7 +214,7 @@ const Search = () => {
         {!selectedCategory && (
           <div className="text-center py-12 text-muted-foreground">
             <Icons.Search className="h-12 w-12 mx-auto mb-4 opacity-50" />
-            <p>Select a service category above to start searching</p>
+            <p>Select a service category or use quick actions to start searching</p>
           </div>
         )}
       </main>
