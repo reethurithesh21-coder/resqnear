@@ -13,20 +13,13 @@ import { useGeolocation } from '@/hooks/useGeolocation';
 import { supabase } from '@/integrations/supabase/client';
 import { EmergencyService, ServiceCategory, SERVICE_CATEGORIES } from '@/types';
 import { toast } from 'sonner';
+import { useLanguage } from '@/i18n/LanguageContext';
 
 const RADIUS_OPTIONS = [
   { value: '1000', label: '1 km' },
   { value: '5000', label: '5 km' },
   { value: '10000', label: '10 km' },
   { value: '25000', label: '25 km' },
-];
-
-const EMERGENCY_BUTTONS: { category: ServiceCategory; emoji: string; label: string; color: string }[] = [
-  { category: 'ambulance', emoji: '🚑', label: 'Find Ambulance', color: 'bg-ambulance hover:bg-ambulance/90' },
-  { category: 'hospital', emoji: '🏥', label: 'Find Hospital', color: 'bg-hospital hover:bg-hospital/90' },
-  { category: 'police', emoji: '🚓', label: 'Find Police', color: 'bg-police hover:bg-police/90' },
-  { category: 'fire', emoji: '🚒', label: 'Fire Station', color: 'bg-fire hover:bg-fire/90' },
-  { category: 'ngo', emoji: '💚', label: 'Find NGO', color: 'bg-ngo hover:bg-ngo/90' },
 ];
 
 const Search = () => {
@@ -38,9 +31,18 @@ const Search = () => {
   const [services, setServices] = useState<EmergencyService[]>([]);
   const [loading, setLoading] = useState(false);
   const [radius, setRadius] = useState('5000');
+  const { t } = useLanguage();
   
   const { latitude, longitude, loading: locationLoading, error: locationError, refresh } = useGeolocation(true);
   const hasLocation = latitude !== null && longitude !== null;
+
+  const EMERGENCY_BUTTONS: { category: ServiceCategory; emoji: string; labelKey: string; color: string }[] = [
+    { category: 'ambulance', emoji: '🚑', labelKey: 'search.findAmbulance', color: 'bg-ambulance hover:bg-ambulance/90' },
+    { category: 'hospital', emoji: '🏥', labelKey: 'search.findHospital', color: 'bg-hospital hover:bg-hospital/90' },
+    { category: 'police', emoji: '🚓', labelKey: 'search.findPolice', color: 'bg-police hover:bg-police/90' },
+    { category: 'fire', emoji: '🚒', labelKey: 'search.fireStation', color: 'bg-fire hover:bg-fire/90' },
+    { category: 'ngo', emoji: '💚', labelKey: 'search.findNGO', color: 'bg-ngo hover:bg-ngo/90' },
+  ];
 
   useEffect(() => {
     const category = searchParams.get('category') as ServiceCategory;
@@ -106,7 +108,7 @@ const Search = () => {
         <div className="relative max-w-2xl mx-auto">
           <Icons.Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
           <Input
-            placeholder="Search hospitals, police stations, blood banks..."
+            placeholder={t('search.placeholder')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-12 h-12 text-base rounded-full border-2 border-border focus-visible:ring-primary shadow-sm"
@@ -115,7 +117,7 @@ const Search = () => {
 
         {/* Emergency Quick Action Buttons */}
         <section>
-          <h2 className="text-sm font-semibold text-muted-foreground mb-3 uppercase tracking-wider">Quick Actions</h2>
+          <h2 className="text-sm font-semibold text-muted-foreground mb-3 uppercase tracking-wider">{t('search.quickActions')}</h2>
           <div className="flex flex-wrap gap-2">
             {EMERGENCY_BUTTONS.map((btn) => (
               <button
@@ -126,7 +128,7 @@ const Search = () => {
                 }`}
               >
                 <span className="text-lg">{btn.emoji}</span>
-                {btn.label}
+                {t(btn.labelKey)}
               </button>
             ))}
           </div>
@@ -134,7 +136,7 @@ const Search = () => {
 
         {/* Category Grid */}
         <section>
-          <h2 className="text-sm font-semibold text-muted-foreground mb-3 uppercase tracking-wider">All Categories</h2>
+          <h2 className="text-sm font-semibold text-muted-foreground mb-3 uppercase tracking-wider">{t('search.allCategories')}</h2>
           <CategoryGrid 
             selectedCategory={selectedCategory} 
             onSelect={handleCategorySelect}
@@ -145,7 +147,6 @@ const Search = () => {
         {/* Map & Results */}
         {selectedCategory && (
           <section className="space-y-4">
-            {/* Map View */}
             <LeafletMap 
               services={filteredServices}
               userLat={latitude}
@@ -154,12 +155,11 @@ const Search = () => {
               onServiceSelect={(s) => console.log('Selected:', s.name)}
             />
 
-            {/* Filters */}
             <div className="flex gap-3">
               <div className="relative flex-1">
                 <Icons.Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="Filter results..."
+                  placeholder={t('search.filterResults')}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-10"
@@ -182,7 +182,6 @@ const Search = () => {
               </Button>
             </div>
 
-            {/* Results */}
             {loading ? (
               <div className="flex justify-center py-12">
                 <Icons.Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -190,16 +189,16 @@ const Search = () => {
             ) : !hasLocation ? (
               <div className="text-center py-12 text-muted-foreground">
                 <Icons.MapPin className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                <p>Enable location to find services near you</p>
+                <p>{t('search.enableLocation')}</p>
                 <Button variant="outline" className="mt-4" onClick={refresh}>
                   <Icons.MapPin className="h-4 w-4 mr-2" />
-                  Enable Location
+                  {t('search.enableLocationBtn')}
                 </Button>
               </div>
             ) : filteredServices.length === 0 ? (
               <div className="text-center py-12 text-muted-foreground">
                 <Icons.Search className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                <p>No services found matching your search</p>
+                <p>{t('search.noResults')}</p>
               </div>
             ) : (
               <div className="grid gap-4 md:grid-cols-2">
@@ -214,7 +213,7 @@ const Search = () => {
         {!selectedCategory && (
           <div className="text-center py-12 text-muted-foreground">
             <Icons.Search className="h-12 w-12 mx-auto mb-4 opacity-50" />
-            <p>Select a service category or use quick actions to start searching</p>
+            <p>{t('search.selectCategory')}</p>
           </div>
         )}
       </main>

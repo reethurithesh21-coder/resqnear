@@ -15,6 +15,7 @@ import { useGeolocation } from '@/hooks/useGeolocation';
 import { supabase } from '@/integrations/supabase/client';
 import { BloodDonor, BloodGroup, BLOOD_GROUPS } from '@/types';
 import { useToast } from '@/hooks/use-toast';
+import { useLanguage } from '@/i18n/LanguageContext';
 
 const BloodDonors = () => {
   const [searchParams] = useSearchParams();
@@ -22,13 +23,13 @@ const BloodDonors = () => {
   const { user } = useAuth();
   const { latitude, longitude } = useGeolocation();
   const { toast } = useToast();
+  const { t } = useLanguage();
 
   const [activeTab, setActiveTab] = useState(searchParams.get('register') === 'true' ? 'register' : 'search');
   const [donors, setDonors] = useState<BloodDonor[]>([]);
   const [loading, setLoading] = useState(false);
   const [selectedBloodGroup, setSelectedBloodGroup] = useState<BloodGroup | 'all'>('all');
   
-  // Registration form state
   const [formData, setFormData] = useState({
     blood_group: '' as BloodGroup | '',
     full_name: '',
@@ -57,18 +58,13 @@ const BloodDonors = () => {
         }
 
         const { data, error } = await query;
-
         if (error) throw error;
 
-        // Calculate distance if we have user location
         let donorsWithDistance = (data as BloodDonor[]) || [];
         if (latitude && longitude) {
           donorsWithDistance = donorsWithDistance.map(donor => {
             if (donor.latitude && donor.longitude) {
-              const distance = calculateDistance(
-                latitude, longitude,
-                donor.latitude, donor.longitude
-              );
+              const distance = calculateDistance(latitude, longitude, donor.latitude, donor.longitude);
               return { ...donor, distance };
             }
             return donor;
@@ -90,7 +86,6 @@ const BloodDonors = () => {
   useEffect(() => {
     const checkExistingDonor = async () => {
       if (!user) return;
-
       const { data, error } = await supabase
         .from('blood_donors')
         .select('*')
@@ -110,12 +105,11 @@ const BloodDonors = () => {
         });
       }
     };
-
     checkExistingDonor();
   }, [user]);
 
   const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
-    const R = 6371; // Earth's radius in km
+    const R = 6371;
     const dLat = (lat2 - lat1) * Math.PI / 180;
     const dLon = (lon2 - lon1) * Math.PI / 180;
     const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
@@ -127,23 +121,15 @@ const BloodDonors = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     if (!user) {
       navigate('/auth?redirect=/blood-donors?register=true');
       return;
     }
-
     if (!formData.blood_group || !formData.full_name || !formData.phone || !formData.area || !formData.city) {
-      toast({
-        title: 'Missing fields',
-        description: 'Please fill in all required fields.',
-        variant: 'destructive',
-      });
+      toast({ title: 'Missing fields', description: 'Please fill in all required fields.', variant: 'destructive' });
       return;
     }
-
     setSubmitting(true);
-
     try {
       const donorData = {
         user_id: user.id,
@@ -159,37 +145,17 @@ const BloodDonors = () => {
       };
 
       if (existingDonor) {
-        const { error } = await supabase
-          .from('blood_donors')
-          .update(donorData)
-          .eq('id', existingDonor.id);
-
+        const { error } = await supabase.from('blood_donors').update(donorData).eq('id', existingDonor.id);
         if (error) throw error;
-
-        toast({
-          title: 'Profile updated!',
-          description: 'Your donor profile has been updated successfully.',
-        });
+        toast({ title: 'Profile updated!', description: 'Your donor profile has been updated successfully.' });
       } else {
-        const { error } = await supabase
-          .from('blood_donors')
-          .insert(donorData);
-
+        const { error } = await supabase.from('blood_donors').insert(donorData);
         if (error) throw error;
-
-        toast({
-          title: 'Registration successful!',
-          description: 'Thank you for registering as a blood donor.',
-        });
+        toast({ title: 'Registration successful!', description: 'Thank you for registering as a blood donor.' });
       }
-
       setActiveTab('search');
     } catch (error: any) {
-      toast({
-        title: 'Error',
-        description: error.message || 'Something went wrong. Please try again.',
-        variant: 'destructive',
-      });
+      toast({ title: 'Error', description: error.message || 'Something went wrong.', variant: 'destructive' });
     } finally {
       setSubmitting(false);
     }
@@ -206,17 +172,17 @@ const BloodDonors = () => {
               <Icons.Droplets className="h-8 w-8 text-white" />
             </div>
           </div>
-          <h1 className="text-3xl font-bold text-foreground mb-2">Blood Donors</h1>
+          <h1 className="text-3xl font-bold text-foreground mb-2">{t('blood.title')}</h1>
           <p className="text-muted-foreground max-w-lg mx-auto">
-            Find blood donors near you or register as a donor to help save lives.
+            {t('blood.subtitle')}
           </p>
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="max-w-3xl mx-auto">
           <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="search">Find Donors</TabsTrigger>
+            <TabsTrigger value="search">{t('blood.findDonors')}</TabsTrigger>
             <TabsTrigger value="register">
-              {existingDonor ? 'My Profile' : 'Register as Donor'}
+              {existingDonor ? t('blood.myProfile') : t('blood.registerDonor')}
             </TabsTrigger>
           </TabsList>
 
@@ -227,10 +193,10 @@ const BloodDonors = () => {
                 onValueChange={(value) => setSelectedBloodGroup(value as BloodGroup | 'all')}
               >
                 <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="Blood Group" />
+                  <SelectValue placeholder={t('blood.bloodGroup')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Blood Groups</SelectItem>
+                  <SelectItem value="all">{t('blood.allGroups')}</SelectItem>
                   {BLOOD_GROUPS.map((group) => (
                     <SelectItem key={group} value={group}>{group}</SelectItem>
                   ))}
@@ -245,13 +211,13 @@ const BloodDonors = () => {
             ) : donors.length === 0 ? (
               <div className="text-center py-12 text-muted-foreground">
                 <Icons.Droplets className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                <p>No donors found matching your criteria</p>
+                <p>{t('blood.noDonors')}</p>
                 <Button 
                   variant="link" 
                   className="mt-2 text-blood"
                   onClick={() => setActiveTab('register')}
                 >
-                  Be the first to register!
+                  {t('blood.beFirst')}
                 </Button>
               </div>
             ) : (
@@ -267,23 +233,18 @@ const BloodDonors = () => {
             <Card>
               <CardHeader>
                 <CardTitle>
-                  {existingDonor ? 'Update Your Donor Profile' : 'Register as a Blood Donor'}
+                  {existingDonor ? t('blood.updateProfile') : t('blood.registerTitle')}
                 </CardTitle>
                 <CardDescription>
-                  {existingDonor 
-                    ? 'Update your information or availability status.'
-                    : 'Fill in your details to be listed as a blood donor in your area.'
-                  }
+                  {existingDonor ? t('blood.updateDesc') : t('blood.registerDesc')}
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 {!user && (
                   <div className="bg-muted rounded-lg p-4 mb-6 text-center">
-                    <p className="text-muted-foreground mb-3">
-                      You need to sign in to register as a blood donor.
-                    </p>
+                    <p className="text-muted-foreground mb-3">{t('blood.signInRequired')}</p>
                     <Button onClick={() => navigate('/auth?redirect=/blood-donors?register=true')}>
-                      Sign In to Continue
+                      {t('blood.signInContinue')}
                     </Button>
                   </div>
                 )}
@@ -291,14 +252,14 @@ const BloodDonors = () => {
                 <form onSubmit={handleSubmit} className="space-y-4">
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div className="space-y-2">
-                      <Label htmlFor="blood_group">Blood Group *</Label>
+                      <Label htmlFor="blood_group">{t('blood.bloodGroup')} *</Label>
                       <Select 
                         value={formData.blood_group} 
                         onValueChange={(value) => setFormData(prev => ({ ...prev, blood_group: value as BloodGroup }))}
                         disabled={!user}
                       >
                         <SelectTrigger>
-                          <SelectValue placeholder="Select blood group" />
+                          <SelectValue placeholder={t('blood.bloodGroup')} />
                         </SelectTrigger>
                         <SelectContent>
                           {BLOOD_GROUPS.map((group) => (
@@ -308,12 +269,12 @@ const BloodDonors = () => {
                       </Select>
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="full_name">Full Name *</Label>
+                      <Label htmlFor="full_name">{t('blood.fullName')} *</Label>
                       <Input
                         id="full_name"
                         value={formData.full_name}
                         onChange={(e) => setFormData(prev => ({ ...prev, full_name: e.target.value }))}
-                        placeholder="Your full name"
+                        placeholder={t('blood.fullName')}
                         disabled={!user}
                       />
                     </div>
@@ -321,7 +282,7 @@ const BloodDonors = () => {
 
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div className="space-y-2">
-                      <Label htmlFor="phone">Phone Number *</Label>
+                      <Label htmlFor="phone">{t('blood.phone')} *</Label>
                       <Input
                         id="phone"
                         type="tel"
@@ -332,24 +293,24 @@ const BloodDonors = () => {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="area">Area/Locality *</Label>
+                      <Label htmlFor="area">{t('blood.area')} *</Label>
                       <Input
                         id="area"
                         value={formData.area}
                         onChange={(e) => setFormData(prev => ({ ...prev, area: e.target.value }))}
-                        placeholder="Your area or locality"
+                        placeholder={t('blood.area')}
                         disabled={!user}
                       />
                     </div>
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="city">City *</Label>
+                    <Label htmlFor="city">{t('blood.city')} *</Label>
                     <Input
                       id="city"
                       value={formData.city}
                       onChange={(e) => setFormData(prev => ({ ...prev, city: e.target.value }))}
-                      placeholder="Your city"
+                      placeholder={t('blood.city')}
                       disabled={!user}
                     />
                   </div>
@@ -357,10 +318,8 @@ const BloodDonors = () => {
                   <div className="space-y-4 pt-4">
                     <div className="flex items-center justify-between">
                       <div>
-                        <Label htmlFor="is_available">Available for Donation</Label>
-                        <p className="text-sm text-muted-foreground">
-                          Toggle off if you're temporarily unavailable
-                        </p>
+                        <Label htmlFor="is_available">{t('blood.available')}</Label>
+                        <p className="text-sm text-muted-foreground">{t('blood.availableDesc')}</p>
                       </div>
                       <Switch
                         id="is_available"
@@ -372,10 +331,8 @@ const BloodDonors = () => {
 
                     <div className="flex items-center justify-between">
                       <div>
-                        <Label htmlFor="show_contact">Show Contact Info</Label>
-                        <p className="text-sm text-muted-foreground">
-                          Allow others to see your phone number
-                        </p>
+                        <Label htmlFor="show_contact">{t('blood.showContact')}</Label>
+                        <p className="text-sm text-muted-foreground">{t('blood.showContactDesc')}</p>
                       </div>
                       <Switch
                         id="show_contact"
@@ -394,10 +351,10 @@ const BloodDonors = () => {
                     {submitting ? (
                       <>
                         <Icons.Loader2 className="h-4 w-4 animate-spin mr-2" />
-                        {existingDonor ? 'Updating...' : 'Registering...'}
+                        {existingDonor ? t('blood.updating') : t('blood.registering')}
                       </>
                     ) : (
-                      existingDonor ? 'Update Profile' : 'Register as Donor'
+                      existingDonor ? t('blood.updateBtn') : t('blood.registerBtn')
                     )}
                   </Button>
                 </form>
