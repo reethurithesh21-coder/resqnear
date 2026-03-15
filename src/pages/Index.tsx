@@ -6,10 +6,12 @@ import { useGeolocation } from '@/hooks/useGeolocation';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Icons } from '@/components/Icons';
+import { useLanguage } from '@/i18n/LanguageContext';
 
 const Index = () => {
   const { latitude, longitude, loading, error, refresh } = useGeolocation();
   const hasLocation = latitude !== null && longitude !== null;
+  const { t } = useLanguage();
 
   return (
     <div className="min-h-screen bg-background">
@@ -19,11 +21,10 @@ const Index = () => {
         {/* Hero Section */}
         <section className="text-center py-8 md:py-12">
           <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground mb-4">
-            Find Help <span className="text-primary">Near You</span>
+            {t('home.title')} <span className="text-primary">{t('home.titleHighlight')}</span>
           </h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-6">
-            Quickly locate hospitals, ambulance services, police stations, fire stations, 
-            NGOs, and blood donors in your area during emergencies.
+            {t('home.subtitle')}
           </p>
           <LocationStatus 
             loading={loading} 
@@ -42,8 +43,8 @@ const Index = () => {
             <div className="absolute inset-0 rounded-full bg-emergency/20 animate-ping" />
             <div className="absolute inset-2 rounded-full bg-gradient-to-br from-emergency to-emergency/90 flex flex-col items-center justify-center">
               <Icons.Phone className="h-12 w-12 md:h-14 md:w-14 text-white mb-2" />
-              <span className="text-white font-bold text-lg md:text-xl">ONE TAP</span>
-              <span className="text-white/80 text-xs md:text-sm">Local Help Assist</span>
+              <span className="text-white font-bold text-lg md:text-xl">{t('home.oneTap')}</span>
+              <span className="text-white/80 text-xs md:text-sm">{t('home.localHelp')}</span>
             </div>
           </button>
         </section>
@@ -53,7 +54,7 @@ const Index = () => {
 
         {/* Service Categories */}
         <section>
-          <h2 className="text-xl font-semibold mb-4">What do you need?</h2>
+          <h2 className="text-xl font-semibold mb-4">{t('home.whatNeed')}</h2>
           <CategoryGrid />
         </section>
 
@@ -65,18 +66,18 @@ const Index = () => {
                 <Icons.Droplets className="h-8 w-8 text-white" />
               </div>
               <div>
-                <h3 className="text-xl font-semibold text-foreground">Need Blood?</h3>
+                <h3 className="text-xl font-semibold text-foreground">{t('home.needBlood')}</h3>
                 <p className="text-muted-foreground">
-                  Find registered blood donors near you or register as a donor to save lives.
+                  {t('home.needBloodDesc')}
                 </p>
               </div>
             </div>
             <div className="flex gap-3">
               <Button asChild variant="outline">
-                <Link to="/blood-donors">Find Donors</Link>
+                <Link to="/blood-donors">{t('home.findDonors')}</Link>
               </Button>
               <Button asChild className="bg-blood hover:bg-blood/90">
-                <Link to="/blood-donors?register=true">Register as Donor</Link>
+                <Link to="/blood-donors?register=true">{t('home.registerDonor')}</Link>
               </Button>
             </div>
           </div>
@@ -88,27 +89,27 @@ const Index = () => {
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 mb-3">
               <Icons.MapPin className="h-5 w-5 text-primary" />
             </div>
-            <h4 className="font-semibold mb-1">Location-Based</h4>
+            <h4 className="font-semibold mb-1">{t('home.locationBased')}</h4>
             <p className="text-sm text-muted-foreground">
-              Services are sorted by distance from your current location for quick access.
+              {t('home.locationBasedDesc')}
             </p>
           </div>
           <div className="bg-card rounded-xl p-5 border">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-secondary/10 mb-3">
               <Icons.Phone className="h-5 w-5 text-secondary" />
             </div>
-            <h4 className="font-semibold mb-1">One-Tap Calling</h4>
+            <h4 className="font-semibold mb-1">{t('home.oneTapCalling')}</h4>
             <p className="text-sm text-muted-foreground">
-              Call emergency services instantly with a single tap - no searching for numbers.
+              {t('home.oneTapCallingDesc')}
             </p>
           </div>
           <div className="bg-card rounded-xl p-5 border">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent/10 mb-3">
               <Icons.Navigation className="h-5 w-5 text-accent" />
             </div>
-            <h4 className="font-semibold mb-1">Get Directions</h4>
+            <h4 className="font-semibold mb-1">{t('home.getDirections')}</h4>
             <p className="text-sm text-muted-foreground">
-              Get turn-by-turn directions to any service with integrated maps navigation.
+              {t('home.getDirectionsDesc')}
             </p>
           </div>
         </section>
@@ -117,7 +118,7 @@ const Index = () => {
       {/* Footer */}
       <footer className="border-t mt-12">
         <div className="container py-6 text-center text-sm text-muted-foreground">
-          <p>ResQNear - Connecting you to emergency services when you need them most.</p>
+          <p>{t('home.footer')}</p>
         </div>
       </footer>
     </div>
