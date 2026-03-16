@@ -15,6 +15,7 @@ import UserDashboard from "./pages/user/Dashboard";
 import SavedLocations from "./pages/user/SavedLocations";
 import UserSettings from "./pages/user/Settings";
 // Admin Pages
+import AdminLogin from "./pages/admin/AdminLogin";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminUsers from "./pages/admin/AdminUsers";
 import AdminDonors from "./pages/admin/AdminDonors";

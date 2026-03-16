@@ -20,7 +20,7 @@ export function AdminLayout({ children }: AdminLayoutProps) {
   }
 
   if (!isAdmin) {
-    return <Navigate to="/" replace />;
+    return <Navigate to="/admin/login" replace />;
   }
 
   return (
