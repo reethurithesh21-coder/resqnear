@@ -15,6 +15,7 @@ import UserDashboard from "./pages/user/Dashboard";
 import SavedLocations from "./pages/user/SavedLocations";
 import UserSettings from "./pages/user/Settings";
 // Admin Pages
+import AdminLogin from "./pages/admin/AdminLogin";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminUsers from "./pages/admin/AdminUsers";
 import AdminDonors from "./pages/admin/AdminDonors";
@@ -44,6 +45,7 @@ const App = () => (
             <Route path="/settings" element={<UserSettings />} />
             
             {/* Admin Routes */}
+            <Route path="/admin/login" element={<AdminLogin />} />
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/admin/users" element={<AdminUsers />} />
             <Route path="/admin/donors" element={<AdminDonors />} />
