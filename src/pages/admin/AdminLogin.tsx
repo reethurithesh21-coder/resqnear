@@ -4,42 +4,42 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Icons } from '@/components/Icons';
 import { useToast } from '@/hooks/use-toast';
-import { Shield, Eye, EyeOff } from 'lucide-react';
+import { Shield, Eye, EyeOff, Lock, Mail, ArrowLeft } from 'lucide-react';
 
 export default function AdminLogin() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const navigate = useNavigate();
   const { toast } = useToast();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+    setError('');
+
     if (!email.trim() || !password.trim()) {
-      toast({ title: 'Error', description: 'Please enter both email and password.', variant: 'destructive' });
+      setError('Please enter both email and password.');
       return;
     }
 
     setLoading(true);
     try {
-      // Sign in with credentials
       const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password,
       });
 
       if (authError) {
-        toast({ title: 'Invalid credentials', description: 'Invalid email or password. Access denied.', variant: 'destructive' });
+        setError('Invalid email or password.');
         setLoading(false);
         return;
       }
 
-      // Check if user has admin role
       const { data: roleData, error: roleError } = await supabase
         .from('user_roles')
         .select('role')
@@ -48,95 +48,135 @@ export default function AdminLogin() {
         .maybeSingle();
 
       if (roleError || !roleData) {
-        // Not an admin — sign them out and deny access
         await supabase.auth.signOut();
-        toast({ title: 'Access denied', description: 'You do not have admin privileges.', variant: 'destructive' });
+        setError('Access denied. You do not have admin privileges.');
         setLoading(false);
         return;
       }
 
-      // Admin verified — store admin session marker and redirect
       sessionStorage.setItem('admin_authenticated', 'true');
-      toast({ title: 'Welcome, Admin!', description: 'Redirecting to dashboard...' });
+      toast({ title: 'Welcome back, Admin', description: 'Redirecting to dashboard...' });
       navigate('/admin');
-    } catch (err) {
-      toast({ title: 'Error', description: 'Something went wrong. Please try again.', variant: 'destructive' });
+    } catch {
+      setError('Something went wrong. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-4">
-      <div className="w-full max-w-md space-y-6">
-        <div className="text-center space-y-2">
-          <div className="mx-auto h-16 w-16 rounded-2xl bg-primary/10 flex items-center justify-center">
-            <Shield className="h-8 w-8 text-primary" />
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-primary/5 p-4 relative overflow-hidden">
+      {/* Decorative elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-40 -right-40 w-80 h-80 rounded-full bg-primary/5 blur-3xl" />
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 rounded-full bg-primary/5 blur-3xl" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-primary/3 blur-3xl" />
+      </div>
+
+      <div className="w-full max-w-[420px] space-y-8 relative z-10">
+        {/* Back button */}
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => navigate('/')}
+          className="text-muted-foreground hover:text-foreground -ml-2"
+        >
+          <ArrowLeft className="h-4 w-4 mr-1" />
+          Back to site
+        </Button>
+
+        {/* Header */}
+        <div className="text-center space-y-3">
+          <div className="mx-auto h-20 w-20 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center shadow-lg shadow-primary/5">
+            <Shield className="h-10 w-10 text-primary" />
           </div>
-          <h1 className="text-2xl font-bold text-foreground">Admin Access</h1>
-          <p className="text-muted-foreground text-sm">Enter your admin credentials to continue</p>
+          <div className="space-y-1">
+            <h1 className="text-3xl font-bold tracking-tight text-foreground">Admin Portal</h1>
+            <p className="text-muted-foreground text-sm">
+              Restricted access — authorized personnel only
+            </p>
+          </div>
         </div>
 
-        <Card className="border-border/50 shadow-lg">
-          <CardHeader className="pb-4">
-            <CardTitle className="text-lg">Sign In</CardTitle>
-            <CardDescription>This area is restricted to authorized administrators only.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleLogin} className="space-y-4">
+        {/* Login Card */}
+        <Card className="border-border/40 shadow-xl shadow-black/5 backdrop-blur-sm bg-card/80">
+          <CardContent className="pt-6 pb-8 px-6">
+            <form onSubmit={handleLogin} className="space-y-5">
+              {/* Error Message */}
+              {error && (
+                <div className="flex items-center gap-2 p-3 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-sm animate-in fade-in slide-in-from-top-1">
+                  <Lock className="h-4 w-4 shrink-0" />
+                  <span>{error}</span>
+                </div>
+              )}
+
               <div className="space-y-2">
-                <Label htmlFor="admin-email">Email</Label>
-                <Input
-                  id="admin-email"
-                  type="email"
-                  placeholder="admin@example.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  autoComplete="email"
-                  disabled={loading}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="admin-password">Password</Label>
+                <Label htmlFor="admin-email" className="text-sm font-medium">
+                  Email Address
+                </Label>
                 <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="admin-email"
+                    type="email"
+                    placeholder="admin@resqnear.com"
+                    value={email}
+                    onChange={(e) => { setEmail(e.target.value); setError(''); }}
+                    autoComplete="email"
+                    disabled={loading}
+                    className="pl-10 h-11"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="admin-password" className="text-sm font-medium">
+                  Password
+                </Label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
                     id="admin-password"
                     type={showPassword ? 'text' : 'password'}
                     placeholder="••••••••"
                     value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    onChange={(e) => { setPassword(e.target.value); setError(''); }}
                     autoComplete="current-password"
                     disabled={loading}
+                    className="pl-10 pr-10 h-11"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                     tabIndex={-1}
                   >
                     {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
                 </div>
               </div>
-              <Button type="submit" className="w-full" disabled={loading}>
+
+              <Button type="submit" className="w-full h-11 font-medium text-sm" disabled={loading}>
                 {loading ? (
                   <>
                     <Icons.Loader2 className="h-4 w-4 animate-spin mr-2" />
-                    Verifying...
+                    Verifying credentials...
                   </>
                 ) : (
-                  'Sign In as Admin'
+                  <>
+                    <Shield className="h-4 w-4 mr-2" />
+                    Sign In to Dashboard
+                  </>
                 )}
               </Button>
             </form>
           </CardContent>
         </Card>
 
-        <div className="text-center">
-          <Button variant="ghost" size="sm" onClick={() => navigate('/')}>
-            ← Back to Home
-          </Button>
-        </div>
+        {/* Footer */}
+        <p className="text-center text-xs text-muted-foreground/60">
+          Protected by role-based access control
+        </p>
       </div>
     </div>
   );
