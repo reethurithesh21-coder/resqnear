@@ -10,6 +10,7 @@ import BloodDonors from "./pages/BloodDonors";
 import Auth from "./pages/Auth";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
+import ResetPassword from "./pages/ResetPassword";
 // User Dashboard Pages
 import UserDashboard from "./pages/user/Dashboard";
 import SavedLocations from "./pages/user/SavedLocations";
