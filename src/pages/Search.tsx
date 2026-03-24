@@ -4,7 +4,7 @@ import { Header } from '@/components/Header';
 import { CategoryGrid } from '@/components/CategoryGrid';
 import { ServiceCard } from '@/components/ServiceCard';
 import { LocationStatus } from '@/components/LocationStatus';
-import { LeafletMap } from '@/components/LeafletMap';
+
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -147,14 +147,6 @@ const Search = () => {
         {/* Map & Results */}
         {selectedCategory && (
           <section className="space-y-4">
-            <LeafletMap 
-              services={filteredServices}
-              userLat={latitude}
-              userLng={longitude}
-              className="h-[500px] md:h-[550px]"
-              onServiceSelect={(s) => console.log('Selected:', s.name)}
-            />
-
             <div className="flex gap-3">
               <div className="relative flex-1">
                 <Icons.Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
