@@ -4,7 +4,7 @@ import { Header } from '@/components/Header';
 import { CategoryGrid } from '@/components/CategoryGrid';
 import { ServiceCard } from '@/components/ServiceCard';
 import { LocationStatus } from '@/components/LocationStatus';
-import { LeafletMap } from '@/components/LeafletMap';
+
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
