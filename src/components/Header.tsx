@@ -19,7 +19,7 @@ export function Header() {
 
   const handleSignOut = async () => {
     await signOut();
-    navigate('/');
+    navigate('/home');
     setMobileMenuOpen(false);
   };
 
