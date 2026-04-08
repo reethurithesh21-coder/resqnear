@@ -142,7 +142,7 @@ const ProfilePage = () => {
 
   const handleSignOut = async () => {
     await signOut();
-    navigate('/');
+    navigate('/home');
   };
 
   if (authLoading || loading) {

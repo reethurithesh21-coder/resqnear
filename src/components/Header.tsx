@@ -19,12 +19,12 @@ export function Header() {
 
   const handleSignOut = async () => {
     await signOut();
-    navigate('/');
+    navigate('/home');
     setMobileMenuOpen(false);
   };
 
   const navLinks = [
-    { href: '/', label: t('nav.home') },
+    { href: '/home', label: t('nav.home') },
     { href: '/search', label: t('nav.findServices') },
     { href: '/blood-donors', label: t('nav.bloodDonors') },
     ...(user ? [{ href: '/dashboard', label: t('nav.dashboard') }] : []),
@@ -41,7 +41,7 @@ export function Header() {
               <ArrowLeft className="h-5 w-5" />
             </Button>
           )}
-          <Link to="/" className="flex items-center gap-2">
+          <Link to="/home" className="flex items-center gap-2">
             <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
               <Icons.Heart className="h-5 w-5 text-primary-foreground" />
             </div>

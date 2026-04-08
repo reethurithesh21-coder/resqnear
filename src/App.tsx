@@ -4,6 +4,7 @@ import { LanguageProvider } from "@/i18n/LanguageContext";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
 import Index from "./pages/Index";
 import Search from "./pages/Search";
 import BloodDonors from "./pages/BloodDonors";
@@ -34,17 +35,17 @@ const App = () => (
         <BrowserRouter>
           <Routes>
             {/* Public Routes */}
-            <Route path="/" element={<Index />} />
-            <Route path="/search" element={<Search />} />
-            <Route path="/blood-donors" element={<BloodDonors />} />
-            <Route path="/auth" element={<Auth />} />
+            <Route path="/" element={<Auth />} />
             <Route path="/reset-password" element={<ResetPassword />} />
             
-            {/* User Dashboard Routes */}
-            <Route path="/dashboard" element={<UserDashboard />} />
-            <Route path="/profile" element={<Profile />} />
-            <Route path="/saved" element={<SavedLocations />} />
-            <Route path="/settings" element={<UserSettings />} />
+            {/* Protected Routes */}
+            <Route path="/home" element={<ProtectedRoute><Index /></ProtectedRoute>} />
+            <Route path="/search" element={<ProtectedRoute><Search /></ProtectedRoute>} />
+            <Route path="/blood-donors" element={<ProtectedRoute><BloodDonors /></ProtectedRoute>} />
+            <Route path="/dashboard" element={<ProtectedRoute><UserDashboard /></ProtectedRoute>} />
+            <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+            <Route path="/saved" element={<ProtectedRoute><SavedLocations /></ProtectedRoute>} />
+            <Route path="/settings" element={<ProtectedRoute><UserSettings /></ProtectedRoute>} />
             
             {/* Admin Routes */}
             <Route path="/admin/login" element={<AdminLogin />} />

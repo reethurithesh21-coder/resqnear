@@ -69,7 +69,7 @@ export function AdminSidebar() {
         <Button
           variant="ghost"
           className="w-full justify-start gap-3 text-white/60 hover:text-white hover:bg-white/10"
-          onClick={() => { navigate('/'); setMobileOpen(false); }}
+          onClick={() => { navigate('/home'); setMobileOpen(false); }}
         >
           <ChevronLeft className="h-4 w-4" />
           Back to App
