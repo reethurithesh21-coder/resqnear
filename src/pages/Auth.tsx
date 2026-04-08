@@ -165,14 +165,13 @@ const Auth = () => {
       <div className="absolute bottom-0 right-0 w-96 h-96 bg-accent/20 rounded-full blur-3xl translate-x-1/3 translate-y-1/3 animate-pulse" />
       <div className="absolute top-1/2 left-1/2 w-64 h-64 bg-secondary/15 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2" />
 
-      {/* Back to home */}
-      <Link
-        to="/"
-        className="absolute top-6 left-6 flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors z-10"
+      {/* Admin login link */}
+      <button
+        onClick={() => navigate('/admin/login')}
+        className="absolute top-6 right-6 text-xs text-muted-foreground hover:text-foreground transition-colors z-10 underline"
       >
-        <ArrowLeft className="h-4 w-4" />
-        Back to Home
-      </Link>
+        Admin Login
+      </button>
 
       <div className="w-full max-w-md z-10">
         {/* Branding */}
