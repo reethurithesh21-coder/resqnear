@@ -77,11 +77,6 @@ const Search = () => {
     }
   };
 
-  const openInGoogleMaps = (lat: number, lng: number, name: string) => {
-    const url = `https://www.google.com/maps/search/?api=1&query=${lat},${lng}&query_place_id=${encodeURIComponent(name)}`;
-    window.open(url, '_blank', 'noopener,noreferrer');
-  };
-
   const openDirections = (lat: number, lng: number) => {
     const url = `https://www.google.com/maps/dir/?api=1&origin=${latitude},${longitude}&destination=${lat},${lng}&travelmode=driving`;
     window.open(url, '_blank', 'noopener,noreferrer');
