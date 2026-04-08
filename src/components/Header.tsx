@@ -5,7 +5,7 @@ import { Icons } from '@/components/Icons';
 import { useAuth } from '@/hooks/useAuth';
 import { useAdmin } from '@/hooks/useAdmin';
 import { useState } from 'react';
-import { Settings } from 'lucide-react';
+import { Settings, ArrowLeft } from 'lucide-react';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
 import { useLanguage } from '@/i18n/LanguageContext';
 
@@ -35,12 +35,19 @@ export function Header() {
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/80">
       <div className="container flex h-16 items-center justify-between">
-        <Link to="/" className="flex items-center gap-2">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
-            <Icons.Heart className="h-5 w-5 text-primary-foreground" />
-          </div>
-          <span className="text-xl font-bold text-foreground">ResQNear</span>
-        </Link>
+        <div className="flex items-center gap-2">
+          {location.pathname !== '/' && (
+            <Button variant="ghost" size="icon" onClick={() => navigate(-1)} className="shrink-0">
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+          )}
+          <Link to="/" className="flex items-center gap-2">
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
+              <Icons.Heart className="h-5 w-5 text-primary-foreground" />
+            </div>
+            <span className="text-xl font-bold text-foreground">ResQNear</span>
+          </Link>
+        </div>
 
         {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center gap-6">

@@ -157,7 +157,17 @@ export function UserLayout({ children }: UserLayoutProps) {
       </div>
 
       {/* Main Content */}
-      <main className="flex-1 overflow-auto md:p-6 p-4 pt-20 md:pt-6">
+      <main className="flex-1 overflow-auto md:p-6 p-4 pt-20 md:pt-6 relative">
+        {location.pathname !== '/dashboard' && (
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => navigate(-1)}
+            className="absolute top-20 right-4 md:top-4 md:right-4 z-40 shadow-sm"
+          >
+            <ChevronLeft className="h-5 w-5" />
+          </Button>
+        )}
         {children}
       </main>
     </div>
