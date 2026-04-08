@@ -50,7 +50,7 @@ export function UserLayout({ children }: UserLayoutProps) {
     <div className="flex flex-col h-full">
       {/* Logo */}
       <div className="p-4 border-b">
-        <Link to="/" className="flex items-center gap-2">
+        <Link to="/home" className="flex items-center gap-2">
           <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary shrink-0">
             <Icons.Heart className="h-5 w-5 text-primary-foreground" />
           </div>
