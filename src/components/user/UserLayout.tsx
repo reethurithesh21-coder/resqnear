@@ -41,7 +41,7 @@ export function UserLayout({ children }: UserLayoutProps) {
 
   const handleSignOut = async () => {
     await signOut();
-    navigate('/');
+    navigate('/home');
   };
 
   const isActive = (path: string) => location.pathname === path;
