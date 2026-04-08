@@ -22,14 +22,6 @@ import {
   ArrowLeft,
 } from 'lucide-react';
 
-const CATEGORY_COLORS: Record<string, string> = {
-  hospital: 'bg-hospital text-white',
-  ambulance: 'bg-ambulance text-white',
-  police: 'bg-police text-white',
-  fire: 'bg-fire text-white',
-  ngo: 'bg-ngo text-white',
-};
-
 const CATEGORY_EMOJI: Record<string, string> = {
   hospital: '🏥',
   ambulance: '🚑',
