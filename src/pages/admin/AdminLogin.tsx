@@ -78,7 +78,7 @@ export default function AdminLogin() {
         <Button
           variant="ghost"
           size="sm"
-          onClick={() => navigate('/')}
+          onClick={() => navigate('/home')}
           className="text-muted-foreground hover:text-foreground -ml-2"
         >
           <ArrowLeft className="h-4 w-4 mr-1" />
