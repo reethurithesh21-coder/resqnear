@@ -85,7 +85,7 @@ export function UserLayout({ children }: UserLayoutProps) {
       {/* User Section */}
       <div className="p-3 border-t space-y-2">
         <Link
-          to="/"
+          to="/home"
           className={cn(
             'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-colors',
             collapsed && !mobile && 'justify-center px-2'
