@@ -24,7 +24,7 @@ export function Header() {
   };
 
   const navLinks = [
-    { href: '/', label: t('nav.home') },
+    { href: '/home', label: t('nav.home') },
     { href: '/search', label: t('nav.findServices') },
     { href: '/blood-donors', label: t('nav.bloodDonors') },
     ...(user ? [{ href: '/dashboard', label: t('nav.dashboard') }] : []),
