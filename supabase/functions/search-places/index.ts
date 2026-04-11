@@ -80,16 +80,15 @@ async function fetchFromOverpass(
 ): Promise<any[]> {
   const osmFilters = getOsmFilters(category);
 
-  // Build a compact query with a short server-side timeout
+  // Use only node queries for speed; limit results with qt (quick sort by distance)
   const filterClauses = osmFilters
     .map(
-      (f) => `
-      node${f}(around:${radius},${latitude},${longitude});
+      (f) => `node${f}(around:${radius},${latitude},${longitude});
       way${f}(around:${radius},${latitude},${longitude});`
     )
     .join("\n");
 
-  const query = `[out:json][timeout:8];(${filterClauses});out center body qt 30;`;
+  const query = `[out:json][timeout:6];(${filterClauses});out center body qt 20;`;
 
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), OVERPASS_TIMEOUT_MS);
