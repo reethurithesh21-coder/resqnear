@@ -8,12 +8,14 @@ const corsHeaders = {
 
 const OVERPASS_TIMEOUT_MS = 12000;
 const MAX_RETRIES = 2;
-const RETRY_DELAY_MS = 2000;
+const RETRY_DELAY_MS = 3000;
 
-// Multiple Overpass endpoints for redundancy
+// Multiple Overpass mirror endpoints for redundancy
 const OVERPASS_ENDPOINTS = [
   "https://overpass-api.de/api/interpreter",
   "https://overpass.kumi.systems/api/interpreter",
+  "https://maps.mail.ru/osm/tools/overpass/api/interpreter",
+  "https://overpass.openstreetmap.ru/api/interpreter",
 ];
 
 serve(async (req) => {
