@@ -6,16 +6,14 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const OVERPASS_TIMEOUT_MS = 12000;
-const MAX_RETRIES = 2;
-const RETRY_DELAY_MS = 3000;
+const OVERPASS_TIMEOUT_MS = 10000;
+const MAX_RETRIES = 1;
+const RETRY_DELAY_MS = 2000;
 
-// Multiple Overpass mirror endpoints for redundancy
+// Overpass mirror endpoints — tried in order
 const OVERPASS_ENDPOINTS = [
-  "https://overpass-api.de/api/interpreter",
   "https://overpass.kumi.systems/api/interpreter",
-  "https://maps.mail.ru/osm/tools/overpass/api/interpreter",
-  "https://overpass.openstreetmap.ru/api/interpreter",
+  "https://overpass-api.de/api/interpreter",
 ];
 
 serve(async (req) => {
