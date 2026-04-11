@@ -25,7 +25,7 @@ const HospitalFinder = () => {
   const mapInstanceRef = useRef<L.Map | null>(null);
   const userMarkerRef = useRef<L.Marker | null>(null);
   const hospitalMarkersRef = useRef<L.Marker[]>([]);
-  const selectedMarkerRef = useRef<L.Marker | null>(null);
+  
 
   const [hospitals, setHospitals] = useState<EmergencyService[]>([]);
   const [loading, setLoading] = useState(false);
@@ -79,7 +79,7 @@ const HospitalFinder = () => {
         iconSize: [18, 18],
         iconAnchor: [9, 9],
       });
-      userMarkerRef.current = L.marker([latitude!, longitude!], { icon: userIcon, zIndex: 1000 })
+      userMarkerRef.current = L.marker([latitude!, longitude!], { icon: userIcon })
         .addTo(map)
         .bindPopup('<b>📍 You are here</b>');
     }
