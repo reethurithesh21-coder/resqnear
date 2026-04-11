@@ -6,6 +6,16 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+const OVERPASS_TIMEOUT_MS = 10000;
+const MAX_RETRIES = 1;
+const RETRY_DELAY_MS = 2000;
+
+// Overpass mirror endpoints — tried in order
+const OVERPASS_ENDPOINTS = [
+  "https://overpass.kumi.systems/api/interpreter",
+  "https://overpass-api.de/api/interpreter",
+];
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -15,199 +25,154 @@ serve(async (req) => {
     const { latitude, longitude, category, radius = 5000 } = await req.json();
 
     if (!latitude || !longitude || !category) {
-      throw new Error("latitude, longitude, and category are required");
+      return new Response(
+        JSON.stringify({ error: "latitude, longitude, and category are required" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
     }
 
-    // Try Google Places API first
-    const apiKey = Deno.env.get("GOOGLE_MAPS_API_KEY");
-    if (apiKey) {
-      try {
-        const googleResults = await fetchFromGoogle(apiKey, latitude, longitude, category, radius);
-        if (googleResults !== null) {
-          return new Response(JSON.stringify({ services: googleResults }), {
-            headers: { ...corsHeaders, "Content-Type": "application/json" },
-          });
-        }
-      } catch (e) {
-        console.warn("Google Places API failed, falling back to Overpass:", e.message);
-      }
-    }
+    const services = await fetchWithRetry(latitude, longitude, category, radius);
 
-    // Fallback: OpenStreetMap Overpass API (free, no key needed)
-    try {
-      const overpassResults = await fetchFromOverpass(latitude, longitude, category, radius);
-      return new Response(JSON.stringify({ services: overpassResults }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    } catch (e) {
-      console.warn("Overpass API also failed:", e.message);
-      // Return empty results instead of crashing
-      return new Response(JSON.stringify({ services: [], fallback: true }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-  } catch (error) {
-    console.error("Error in search-places:", error);
-    return new Response(JSON.stringify({ error: error.message }), {
+    return new Response(JSON.stringify({ services }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
-      status: 500,
     });
+  } catch (error) {
+    console.error("search-places error:", error.message);
+    return new Response(
+      JSON.stringify({ services: [], fallback: true, error: error.message }),
+      { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
   }
 });
 
-// ── Google Places API ──
-async function fetchFromGoogle(
-  apiKey: string,
-  latitude: number,
-  longitude: number,
-  category: string,
-  radius: number
-): Promise<any[] | null> {
-  const categoryConfig: Record<string, { type?: string; keyword: string }> = {
-    hospital: { type: "hospital", keyword: "hospital emergency" },
-    ambulance: { keyword: "ambulance service emergency medical" },
-    police: { type: "police", keyword: "police station" },
-    fire: { type: "fire_station", keyword: "fire station" },
-    ngo: { keyword: "ngo charity humanitarian organization" },
-  };
-
-  const config = categoryConfig[category];
-  if (!config) throw new Error(`Invalid category: ${category}`);
-
-  const params = new URLSearchParams({
-    location: `${latitude},${longitude}`,
-    radius: String(radius),
-    keyword: config.keyword,
-    key: apiKey,
-  });
-  if (config.type) params.set("type", config.type);
-
-  const url = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?${params}`;
-  const response = await fetch(url);
-  const data = await response.json();
-
-  if (data.status === "REQUEST_DENIED") {
-    throw new Error("Google API key invalid or Places API not enabled");
-  }
-  if (data.status !== "OK" && data.status !== "ZERO_RESULTS") {
-    throw new Error(`Google Places API error: ${data.status}`);
-  }
-
-  const results = (data.results || []).map((place: any) => {
-    const loc = place.geometry?.location;
-    const dist = loc ? haversineDistance(latitude, longitude, loc.lat, loc.lng) : undefined;
-    return {
-      place_id: place.place_id,
-      name: place.name,
-      address: place.vicinity || place.formatted_address || "",
-      latitude: loc?.lat,
-      longitude: loc?.lng,
-      distance: dist,
-      rating: place.rating || null,
-      category,
-      isOpen: place.opening_hours?.open_now ?? null,
-      phone: null,
-    };
-  });
-
-  results.sort((a: any, b: any) => (a.distance ?? Infinity) - (b.distance ?? Infinity));
-
-  // Fetch phone numbers for top 10
-  const detailed = await Promise.all(
-    results.slice(0, 10).map(async (place: any) => {
-      try {
-        const detailUrl = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${place.place_id}&fields=formatted_phone_number&key=${apiKey}`;
-        const res = await fetch(detailUrl);
-        const d = await res.json();
-        return { ...place, phone: d.result?.formatted_phone_number || null };
-      } catch {
-        return place;
-      }
-    })
-  );
-
-  return [...detailed, ...results.slice(10)];
-}
-
-// ── OpenStreetMap Overpass API (free fallback) ──
-async function fetchFromOverpass(
+async function fetchWithRetry(
   latitude: number,
   longitude: number,
   category: string,
   radius: number
 ): Promise<any[]> {
-  const osmTags: Record<string, string> = {
-    hospital: '["amenity"="hospital"]',
-    ambulance: '["emergency"="ambulance_station"]',
-    police: '["amenity"="police"]',
-    fire: '["amenity"="fire_station"]',
-    ngo: '["office"="ngo"]',
-  };
+  let lastError: Error | null = null;
 
-  const tag = osmTags[category] || '["amenity"="hospital"]';
-
-  const query = `
-    [out:json][timeout:10];
-    (
-      node${tag}(around:${radius},${latitude},${longitude});
-      way${tag}(around:${radius},${latitude},${longitude});
-      relation${tag}(around:${radius},${latitude},${longitude});
-    );
-    out center body;
-  `;
-
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 8000);
-
-  const response = await fetch("https://overpass-api.de/api/interpreter", {
-    method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: `data=${encodeURIComponent(query)}`,
-    signal: controller.signal,
-  });
-
-  clearTimeout(timeoutId);
-
-  if (!response.ok) {
-    throw new Error(`Overpass API error: ${response.status}`);
+  for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+    for (const endpoint of OVERPASS_ENDPOINTS) {
+      try {
+        const results = await fetchFromOverpass(endpoint, latitude, longitude, category, radius);
+        return results;
+      } catch (e) {
+        lastError = e;
+        console.warn(`Attempt ${attempt + 1}, endpoint ${endpoint} failed: ${e.message}`);
+      }
+    }
+    if (attempt < MAX_RETRIES) {
+      await new Promise((r) => setTimeout(r, RETRY_DELAY_MS));
+    }
   }
 
-  const data = await response.json();
+  throw lastError || new Error("All Overpass API attempts failed");
+}
 
-  const results = (data.elements || [])
-    .map((el: any) => {
-      const lat = el.lat ?? el.center?.lat;
-      const lon = el.lon ?? el.center?.lon;
-      if (!lat || !lon) return null;
+async function fetchFromOverpass(
+  endpoint: string,
+  latitude: number,
+  longitude: number,
+  category: string,
+  radius: number
+): Promise<any[]> {
+  const osmFilters = getOsmFilters(category);
 
-      const tags = el.tags || {};
-      const dist = haversineDistance(latitude, longitude, lat, lon);
+  // Use only node queries for speed; limit results with qt (quick sort by distance)
+  const filterClauses = osmFilters
+    .map(
+      (f) => `node${f}(around:${radius},${latitude},${longitude});
+      way${f}(around:${radius},${latitude},${longitude});`
+    )
+    .join("\n");
 
-      return {
-        place_id: `osm_${el.type}_${el.id}`,
-        name: tags.name || tags["name:en"] || `${category.charAt(0).toUpperCase() + category.slice(1)}`,
-        address: [tags["addr:street"], tags["addr:city"]].filter(Boolean).join(", ") || tags.name || "",
-        latitude: lat,
-        longitude: lon,
-        distance: dist,
-        rating: null,
-        category,
-        isOpen: null,
-        phone: tags.phone || tags["contact:phone"] || null,
-      };
-    })
-    .filter(Boolean);
+  const query = `[out:json][timeout:6];(${filterClauses});out center body qt 20;`;
 
-  results.sort((a: any, b: any) => (a.distance ?? Infinity) - (b.distance ?? Infinity));
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), OVERPASS_TIMEOUT_MS);
 
-  return results;
+  try {
+    const response = await fetch(endpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: `data=${encodeURIComponent(query)}`,
+      signal: controller.signal,
+    });
+
+    if (!response.ok) {
+      throw new Error(`Overpass ${response.status}`);
+    }
+
+    const data = await response.json();
+
+    return (data.elements || [])
+      .map((el: any) => {
+        const lat = el.lat ?? el.center?.lat;
+        const lon = el.lon ?? el.center?.lon;
+        if (!lat || !lon) return null;
+
+        const tags = el.tags || {};
+        const dist = haversineDistance(latitude, longitude, lat, lon);
+
+        return {
+          place_id: `osm_${el.type}_${el.id}`,
+          name: tags.name || tags["name:en"] || formatCategoryName(category),
+          address: buildAddress(tags),
+          latitude: lat,
+          longitude: lon,
+          distance: dist,
+          rating: null,
+          category,
+          isOpen: null,
+          phone: tags.phone || tags["contact:phone"] || null,
+        };
+      })
+      .filter(Boolean)
+      .sort((a: any, b: any) => (a.distance ?? Infinity) - (b.distance ?? Infinity));
+  } catch (error) {
+    if (error.name === "AbortError") {
+      throw new Error(`Overpass timeout (${endpoint})`);
+    }
+    throw error;
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
+
+function getOsmFilters(category: string): string[] {
+  const map: Record<string, string[]> = {
+    hospital: ['["amenity"="hospital"]', '["amenity"="clinic"]'],
+    ambulance: ['["emergency"="ambulance_station"]', '["amenity"="hospital"]["emergency"="yes"]'],
+    police: ['["amenity"="police"]'],
+    fire: ['["amenity"="fire_station"]'],
+    ngo: ['["office"="ngo"]', '["office"="association"]'],
+  };
+  return map[category] || ['["amenity"="hospital"]'];
+}
+
+function formatCategoryName(category: string): string {
+  return category.charAt(0).toUpperCase() + category.slice(1);
+}
+
+function buildAddress(tags: Record<string, string>): string {
+  const parts = [
+    tags["addr:housenumber"],
+    tags["addr:street"],
+    tags["addr:city"],
+    tags["addr:postcode"],
+  ].filter(Boolean);
+  return parts.length > 0 ? parts.join(", ") : tags.name || "Address not available";
 }
 
 function haversineDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
   const R = 6371;
   const dLat = toRad(lat2 - lat1);
   const dLon = toRad(lon2 - lon1);
-  const a = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
