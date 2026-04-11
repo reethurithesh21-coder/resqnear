@@ -34,11 +34,18 @@ serve(async (req) => {
     }
 
     // Fallback: OpenStreetMap Overpass API (free, no key needed)
-    const overpassResults = await fetchFromOverpass(latitude, longitude, category, radius);
-
-    return new Response(JSON.stringify({ services: overpassResults }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    try {
+      const overpassResults = await fetchFromOverpass(latitude, longitude, category, radius);
+      return new Response(JSON.stringify({ services: overpassResults }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    } catch (e) {
+      console.warn("Overpass API also failed:", e.message);
+      // Return empty results instead of crashing
+      return new Response(JSON.stringify({ services: [], fallback: true }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
   } catch (error) {
     console.error("Error in search-places:", error);
     return new Response(JSON.stringify({ error: error.message }), {
@@ -149,11 +156,17 @@ async function fetchFromOverpass(
     out center body;
   `;
 
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 8000);
+
   const response = await fetch("https://overpass-api.de/api/interpreter", {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: `data=${encodeURIComponent(query)}`,
+    signal: controller.signal,
   });
+
+  clearTimeout(timeoutId);
 
   if (!response.ok) {
     throw new Error(`Overpass API error: ${response.status}`);
