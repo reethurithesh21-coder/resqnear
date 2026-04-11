@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import Index from "./pages/Index";
 import Search from "./pages/Search";
+import HospitalFinder from "./pages/HospitalFinder";
 import BloodDonors from "./pages/BloodDonors";
 import Auth from "./pages/Auth";
 import Profile from "./pages/Profile";
@@ -41,6 +42,7 @@ const App = () => (
             {/* Protected Routes */}
             <Route path="/home" element={<ProtectedRoute><Index /></ProtectedRoute>} />
             <Route path="/search" element={<ProtectedRoute><Search /></ProtectedRoute>} />
+            <Route path="/hospital-finder" element={<ProtectedRoute><HospitalFinder /></ProtectedRoute>} />
             <Route path="/blood-donors" element={<ProtectedRoute><BloodDonors /></ProtectedRoute>} />
             <Route path="/dashboard" element={<ProtectedRoute><UserDashboard /></ProtectedRoute>} />
             <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
