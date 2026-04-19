@@ -22,7 +22,7 @@ serve(async (req) => {
   }
 
   try {
-    const { latitude, longitude, category, radius = 5000 } = await req.json();
+    const { latitude, longitude, category, radius = 15000 } = await req.json();
 
     if (!latitude || !longitude || !category) {
       return new Response(
@@ -88,7 +88,7 @@ async function fetchFromOverpass(
     )
     .join("\n");
 
-  const query = `[out:json][timeout:6];(${filterClauses});out center body qt 20;`;
+  const query = `[out:json][timeout:25];(${filterClauses});out center body qt 50;`;
 
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), OVERPASS_TIMEOUT_MS);
@@ -143,11 +143,26 @@ async function fetchFromOverpass(
 
 function getOsmFilters(category: string): string[] {
   const map: Record<string, string[]> = {
-    hospital: ['["amenity"="hospital"]', '["amenity"="clinic"]'],
-    ambulance: ['["emergency"="ambulance_station"]', '["amenity"="hospital"]["emergency"="yes"]'],
-    police: ['["amenity"="police"]'],
-    fire: ['["amenity"="fire_station"]'],
-    ngo: ['["office"="ngo"]', '["office"="association"]'],
+    hospital: [
+      '["amenity"="hospital"]',
+      '["amenity"="clinic"]',
+      '["amenity"="doctors"]',
+      '["healthcare"="hospital"]',
+      '["healthcare"="clinic"]',
+    ],
+    ambulance: [
+      '["emergency"="ambulance_station"]',
+      '["amenity"="hospital"]',
+      '["healthcare"="hospital"]',
+    ],
+    police: ['["amenity"="police"]', '["building"="police"]'],
+    fire: ['["amenity"="fire_station"]', '["building"="fire_station"]'],
+    ngo: [
+      '["office"="ngo"]',
+      '["office"="association"]',
+      '["office"="charity"]',
+      '["amenity"="social_facility"]',
+    ],
   };
   return map[category] || ['["amenity"="hospital"]'];
 }
