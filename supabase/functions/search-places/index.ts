@@ -114,12 +114,21 @@ async function fetchFromOverpass(
         if (!lat || !lon) return null;
 
         const tags = el.tags || {};
+        const realName = tags.name || tags["name:en"] || tags["official_name"] || tags["alt_name"];
+        // Skip entries without a real name — avoid generic "Hospital"/"Police" placeholders
+        if (!realName) return null;
+
         const dist = haversineDistance(latitude, longitude, lat, lon);
+        const address = buildAddress(tags);
+        // Skip entries with no usable address info
+        if (address === "Address not available" && !tags.phone && !tags["contact:phone"]) {
+          // keep only if it has a name (already verified above)
+        }
 
         return {
           place_id: `osm_${el.type}_${el.id}`,
-          name: tags.name || tags["name:en"] || formatCategoryName(category),
-          address: buildAddress(tags),
+          name: realName,
+          address,
           latitude: lat,
           longitude: lon,
           distance: dist,
