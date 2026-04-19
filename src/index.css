@@ -2,97 +2,94 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ResQNear Design System - Calming Blues & Greens */
+/* ResQNear Design System - Soft Pink Theme */
 
 @layer base {
   :root {
-    --background: 200 20% 98%;
-    --foreground: 200 50% 10%;
+    --background: 340 30% 98%;
+    --foreground: 340 50% 15%;
 
     --card: 0 0% 100%;
-    --card-foreground: 200 50% 10%;
+    --card-foreground: 340 50% 15%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 200 50% 10%;
+    --popover-foreground: 340 50% 15%;
 
-    --primary: 199 89% 48%;
+    --primary: 340 80% 60%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 152 60% 45%;
-    --secondary-foreground: 0 0% 100%;
+    --secondary: 330 60% 75%;
+    --secondary-foreground: 340 50% 15%;
 
-    --muted: 200 20% 94%;
-    --muted-foreground: 200 20% 40%;
+    --muted: 340 20% 94%;
+    --muted-foreground: 340 20% 45%;
 
-    --accent: 168 76% 42%;
+    --accent: 350 70% 65%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 200 20% 88%;
-    --input: 200 20% 88%;
-    --ring: 199 89% 48%;
+    --border: 340 30% 90%;
+    --input: 340 30% 90%;
+    --ring: 340 80% 60%;
 
     --radius: 0.75rem;
 
-    /* Custom emergency colors */
+    /* Custom emergency colors - adjusted for pink theme */
     --emergency: 0 84% 60%;
     --emergency-foreground: 0 0% 100%;
-    --hospital: 199 89% 48%;
+    --hospital: 340 70% 55%;
     --ambulance: 25 95% 53%;
     --police: 217 91% 60%;
     --fire: 0 84% 60%;
-    --ngo: 152 60% 45%;
+    --ngo: 330 60% 60%;
     --blood: 348 83% 47%;
 
-    --sidebar-background: 200 20% 98%;
-    --sidebar-foreground: 200 50% 10%;
-    --sidebar-primary: 199 89% 48%;
+    --sidebar-background: 340 30% 98%;
+    --sidebar-foreground: 340 50% 15%;
+    --sidebar-primary: 340 80% 60%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 200 20% 94%;
-    --sidebar-accent-foreground: 200 50% 10%;
-    --sidebar-border: 200 20% 88%;
-    --sidebar-ring: 199 89% 48%;
+    --sidebar-accent: 340 25% 94%;
+    --sidebar-accent-foreground: 340 50% 15%;
+    --sidebar-border: 340 30% 88%;
+    --sidebar-ring: 340 80% 60%;
   }
 
   .dark {
-    --background: 200 50% 8%;
-    --foreground: 200 20% 98%;
+    --background: 340 40% 10%;
+    --foreground: 340 20% 95%;
 
-    --card: 200 50% 12%;
-    --card-foreground: 200 20% 98%;
+    --card: 340 35% 12%;
+    --card-foreground: 340 20% 95%;
 
-    --popover: 200 50% 12%;
-    --popover-foreground: 200 20% 98%;
+    --primary: 340 80% 65%;
+    --primary-foreground: 340 40% 10%;
 
-    --primary: 199 89% 48%;
-    --primary-foreground: 0 0% 100%;
+    --secondary: 330 50% 30%;
+    --secondary-foreground: 340 20% 95%;
 
-    --secondary: 152 60% 45%;
-    --secondary-foreground: 0 0% 100%;
+    --muted: 340 30% 18%;
+    --muted-foreground: 340 20% 65%;
 
-    --muted: 200 50% 18%;
-    --muted-foreground: 200 20% 65%;
-
-    --accent: 168 76% 42%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 350 70% 60%;
+    --accent-foreground: 340 40% 10%;
 
     --destructive: 0 62% 50%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 200 50% 20%;
-    --input: 200 50% 20%;
-    --ring: 199 89% 48%;
+    --border: 340 30% 20%;
+    --input: 340 30% 20%;
+    --ring: 340 80% 65%;
 
-    --sidebar-background: 200 50% 10%;
-    --sidebar-foreground: 200 20% 98%;
-    --sidebar-primary: 199 89% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 200 50% 18%;
-    --sidebar-accent-foreground: 200 20% 98%;
-    --sidebar-border: 200 50% 20%;
-    --sidebar-ring: 199 89% 48%;
+    --sidebar-background: 340 35% 10%;
+    --sidebar-foreground: 340 20% 95%;
+    --sidebar-primary: 340 80% 65%;
+    --sidebar-primary-foreground: 340 40% 10%;
+    --sidebar-accent: 340 30% 18%;
+    --sidebar-accent-foreground: 340 20% 95%;
+    --sidebar-border: 340 30% 20%;
+    --sidebar-ring: 340 80% 65%;
   }
 }
 
