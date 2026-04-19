@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Header } from '@/components/Header';
 import { CategoryGrid } from '@/components/CategoryGrid';
 import { LocationStatus } from '@/components/LocationStatus';
+import { ManualLocationInput } from '@/components/ManualLocationInput';
 import { Input } from '@/components/ui/input';
 import { Icons } from '@/components/Icons';
 import { Button } from '@/components/ui/button';
@@ -35,9 +36,12 @@ const Search = () => {
   const [results, setResults] = useState<EmergencyService[]>([]);
   const [loadingResults, setLoadingResults] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<ServiceCategory | null>(null);
+  const [manualLocation, setManualLocation] = useState<{ lat: number; lon: number; label: string } | null>(null);
   const { t } = useLanguage();
 
-  const { latitude, longitude, loading: locationLoading, error: locationError, refresh } = useGeolocation(true);
+  const { latitude: gpsLat, longitude: gpsLon, loading: locationLoading, error: locationError, refresh } = useGeolocation(true);
+  const latitude = manualLocation ? manualLocation.lat : gpsLat;
+  const longitude = manualLocation ? manualLocation.lon : gpsLon;
   const hasLocation = latitude !== null && longitude !== null;
 
   const EMERGENCY_BUTTONS: { category: ServiceCategory; emoji: string; labelKey: string; color: string }[] = [
@@ -98,12 +102,19 @@ const Search = () => {
 
       <main className="container py-6 space-y-6">
         {/* Location Status */}
-        <div className="flex justify-center">
+        <div className="flex flex-col items-center gap-3">
           <LocationStatus
             loading={locationLoading}
             error={locationError}
             hasLocation={hasLocation}
             onRetry={refresh}
+            latitude={latitude}
+            longitude={longitude}
+          />
+          <ManualLocationInput
+            currentLabel={manualLocation?.label ?? null}
+            onLocationSet={(lat, lon, label) => setManualLocation({ lat, lon, label })}
+            onClear={() => setManualLocation(null)}
           />
         </div>
 
