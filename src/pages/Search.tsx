@@ -60,7 +60,7 @@ const Search = () => {
 
     try {
       const { data, error } = await supabase.functions.invoke('search-places', {
-        body: { latitude, longitude, category, radius: 5000 },
+        body: { latitude, longitude, category, radius: 15000 },
       });
 
       if (error) throw error;
