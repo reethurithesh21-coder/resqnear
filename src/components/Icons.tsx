@@ -32,10 +32,6 @@ export function getCategoryIcon(category: ServiceCategory) {
       return Hospital;
     case 'ambulance':
       return Ambulance;
-    case 'police':
-      return Shield;
-    case 'fire':
-      return Flame;
     case 'ngo':
       return Heart;
     default:
@@ -49,10 +45,6 @@ export function getCategoryColor(category: ServiceCategory): string {
       return 'bg-hospital text-white';
     case 'ambulance':
       return 'bg-ambulance text-white';
-    case 'police':
-      return 'bg-police text-white';
-    case 'fire':
-      return 'bg-fire text-white';
     case 'ngo':
       return 'bg-ngo text-white';
     default:
