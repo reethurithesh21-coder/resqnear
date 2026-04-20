@@ -6,14 +6,16 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const OVERPASS_TIMEOUT_MS = 10000;
-const MAX_RETRIES = 1;
-const RETRY_DELAY_MS = 2000;
+const OVERPASS_TIMEOUT_MS = 15000;
+const MAX_RETRIES = 2;
+const RETRY_DELAY_MS = 1500;
 
-// Overpass mirror endpoints — tried in order
+// Overpass mirror endpoints — tried in order. More mirrors = more resilience.
 const OVERPASS_ENDPOINTS = [
-  "https://overpass.kumi.systems/api/interpreter",
   "https://overpass-api.de/api/interpreter",
+  "https://overpass.kumi.systems/api/interpreter",
+  "https://overpass.openstreetmap.ru/api/interpreter",
+  "https://maps.mail.ru/osm/tools/overpass/api/interpreter",
 ];
 
 serve(async (req) => {
@@ -24,16 +26,25 @@ serve(async (req) => {
   try {
     const { latitude, longitude, category, radius = 15000 } = await req.json();
 
-    if (!latitude || !longitude || !category) {
+    if (latitude == null || longitude == null || !category) {
       return new Response(
         JSON.stringify({ error: "latitude, longitude, and category are required" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    const services = await fetchWithRetry(latitude, longitude, category, radius);
+    // Try requested radius first, then expand if nothing found
+    let services = await fetchWithRetry(latitude, longitude, category, radius);
+    if (services.length === 0 && radius < 30000) {
+      console.log(`No results at ${radius}m, expanding to 30000m`);
+      services = await fetchWithRetry(latitude, longitude, category, 30000);
+    }
+    if (services.length === 0) {
+      console.log(`No results at 30000m, expanding to 50000m`);
+      services = await fetchWithRetry(latitude, longitude, category, 50000);
+    }
 
-    return new Response(JSON.stringify({ services }), {
+    return new Response(JSON.stringify({ services, count: services.length }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error) {
@@ -57,10 +68,13 @@ async function fetchWithRetry(
     for (const endpoint of OVERPASS_ENDPOINTS) {
       try {
         const results = await fetchFromOverpass(endpoint, latitude, longitude, category, radius);
-        return results;
+        if (results.length > 0 || attempt === MAX_RETRIES) {
+          return results;
+        }
+        // Empty result — try next endpoint in case it's a server-side hiccup
       } catch (e) {
-        lastError = e;
-        console.warn(`Attempt ${attempt + 1}, endpoint ${endpoint} failed: ${e.message}`);
+        lastError = e as Error;
+        console.warn(`Attempt ${attempt + 1}, endpoint ${endpoint} failed: ${(e as Error).message}`);
       }
     }
     if (attempt < MAX_RETRIES) {
@@ -68,7 +82,8 @@ async function fetchWithRetry(
     }
   }
 
-  throw lastError || new Error("All Overpass API attempts failed");
+  if (lastError) throw lastError;
+  return [];
 }
 
 async function fetchFromOverpass(
@@ -80,15 +95,19 @@ async function fetchFromOverpass(
 ): Promise<any[]> {
   const osmFilters = getOsmFilters(category);
 
-  // Use only node queries for speed; limit results with qt (quick sort by distance)
+  // Build a valid Overpass QL query.
+  // Each filter becomes a node+way+relation around the point.
   const filterClauses = osmFilters
     .map(
-      (f) => `node${f}(around:${radius},${latitude},${longitude});
-      way${f}(around:${radius},${latitude},${longitude});`
+      (f) =>
+        `node${f}(around:${radius},${latitude},${longitude});` +
+        `way${f}(around:${radius},${latitude},${longitude});` +
+        `relation${f}(around:${radius},${latitude},${longitude});`
     )
-    .join("\n");
+    .join("");
 
-  const query = `[out:json][timeout:25];(${filterClauses});out center body qt 50;`;
+  // Correct syntax: `out center tags 80;` — center for ways/relations, tags for metadata, limit 80
+  const query = `[out:json][timeout:25];(${filterClauses});out center tags 80;`;
 
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), OVERPASS_TIMEOUT_MS);
@@ -96,13 +115,19 @@ async function fetchFromOverpass(
   try {
     const response = await fetch(endpoint, {
       method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+        // Overpass servers require a descriptive User-Agent or they return 429/406
+        "User-Agent": "ResQNear-EmergencyApp/1.0 (https://resqnear.app; contact@resqnear.app)",
+        Accept: "application/json",
+      },
       body: `data=${encodeURIComponent(query)}`,
       signal: controller.signal,
     });
 
     if (!response.ok) {
-      throw new Error(`Overpass ${response.status}`);
+      const text = await response.text().catch(() => "");
+      throw new Error(`Overpass ${response.status}${text ? `: ${text.slice(0, 100)}` : ""}`);
     }
 
     const data = await response.json();
@@ -114,34 +139,34 @@ async function fetchFromOverpass(
         if (!lat || !lon) return null;
 
         const tags = el.tags || {};
-        const realName = tags.name || tags["name:en"] || tags["official_name"] || tags["alt_name"];
-        // Skip entries without a real name — avoid generic "Hospital"/"Police" placeholders
+        const realName =
+          tags.name ||
+          tags["name:en"] ||
+          tags["official_name"] ||
+          tags["alt_name"] ||
+          tags["operator"];
+        // Skip entries without a real name to avoid generic placeholders
         if (!realName) return null;
 
         const dist = haversineDistance(latitude, longitude, lat, lon);
-        const address = buildAddress(tags);
-        // Skip entries with no usable address info
-        if (address === "Address not available" && !tags.phone && !tags["contact:phone"]) {
-          // keep only if it has a name (already verified above)
-        }
 
         return {
           place_id: `osm_${el.type}_${el.id}`,
           name: realName,
-          address,
+          address: buildAddress(tags),
           latitude: lat,
           longitude: lon,
           distance: dist,
           rating: null,
           category,
-          isOpen: null,
-          phone: tags.phone || tags["contact:phone"] || null,
+          isOpen: tags.opening_hours === "24/7" ? true : null,
+          phone: tags.phone || tags["contact:phone"] || tags["contact:mobile"] || null,
         };
       })
       .filter(Boolean)
       .sort((a: any, b: any) => (a.distance ?? Infinity) - (b.distance ?? Infinity));
   } catch (error) {
-    if (error.name === "AbortError") {
+    if ((error as Error).name === "AbortError") {
       throw new Error(`Overpass timeout (${endpoint})`);
     }
     throw error;
@@ -158,14 +183,15 @@ function getOsmFilters(category: string): string[] {
       '["amenity"="doctors"]',
       '["healthcare"="hospital"]',
       '["healthcare"="clinic"]',
+      '["healthcare"="doctor"]',
     ],
     ambulance: [
       '["emergency"="ambulance_station"]',
       '["amenity"="hospital"]',
       '["healthcare"="hospital"]',
     ],
-    police: ['["amenity"="police"]', '["building"="police"]'],
-    fire: ['["amenity"="fire_station"]', '["building"="fire_station"]'],
+    police: ['["amenity"="police"]'],
+    fire: ['["amenity"="fire_station"]'],
     ngo: [
       '["office"="ngo"]',
       '["office"="association"]',
@@ -176,18 +202,16 @@ function getOsmFilters(category: string): string[] {
   return map[category] || ['["amenity"="hospital"]'];
 }
 
-function formatCategoryName(category: string): string {
-  return category.charAt(0).toUpperCase() + category.slice(1);
-}
-
 function buildAddress(tags: Record<string, string>): string {
   const parts = [
     tags["addr:housenumber"],
     tags["addr:street"],
-    tags["addr:city"],
+    tags["addr:city"] || tags["addr:suburb"] || tags["addr:village"],
     tags["addr:postcode"],
   ].filter(Boolean);
-  return parts.length > 0 ? parts.join(", ") : tags.name || "Address not available";
+  if (parts.length > 0) return parts.join(", ");
+  if (tags["addr:full"]) return tags["addr:full"];
+  return "Address not available";
 }
 
 function haversineDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
