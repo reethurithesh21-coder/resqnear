@@ -26,8 +26,6 @@ import {
 const CATEGORY_EMOJI: Record<string, string> = {
   hospital: '🏥',
   ambulance: '🚑',
-  police: '🚓',
-  fire: '🚒',
   ngo: '💚',
 };
 
@@ -47,8 +45,6 @@ const Search = () => {
   const EMERGENCY_BUTTONS: { category: ServiceCategory; emoji: string; labelKey: string; color: string }[] = [
     { category: 'ambulance', emoji: '🚑', labelKey: 'search.findAmbulance', color: 'bg-ambulance hover:bg-ambulance/90' },
     { category: 'hospital', emoji: '🏥', labelKey: 'search.findHospital', color: 'bg-hospital hover:bg-hospital/90' },
-    { category: 'police', emoji: '🚓', labelKey: 'search.findPolice', color: 'bg-police hover:bg-police/90' },
-    { category: 'fire', emoji: '🚒', labelKey: 'search.fireStation', color: 'bg-fire hover:bg-fire/90' },
     { category: 'ngo', emoji: '💚', labelKey: 'search.findNGO', color: 'bg-ngo hover:bg-ngo/90' },
   ];
 

@@ -1,4 +1,4 @@
-export type ServiceCategory = 'hospital' | 'ambulance' | 'police' | 'fire' | 'ngo';
+export type ServiceCategory = 'hospital' | 'ambulance' | 'ngo';
 export type BloodGroup = 'A+' | 'A-' | 'B+' | 'B-' | 'AB+' | 'AB-' | 'O+' | 'O-';
 
 export interface EmergencyService {
@@ -55,8 +55,6 @@ export const BLOOD_GROUPS: BloodGroup[] = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-',
 export const SERVICE_CATEGORIES: { id: ServiceCategory; label: string; icon: string; searchQuery: string }[] = [
   { id: 'hospital', label: 'Hospitals', icon: 'Hospital', searchQuery: 'hospital' },
   { id: 'ambulance', label: 'Ambulance', icon: 'Ambulance', searchQuery: 'ambulance service' },
-  { id: 'police', label: 'Police', icon: 'Shield', searchQuery: 'police station' },
-  { id: 'fire', label: 'Fire Station', icon: 'Flame', searchQuery: 'fire station' },
   { id: 'ngo', label: 'NGOs', icon: 'Heart', searchQuery: 'ngo charity organization' },
 ];
 

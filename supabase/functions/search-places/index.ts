@@ -190,8 +190,6 @@ function getOsmFilters(category: string): string[] {
       '["amenity"="hospital"]',
       '["healthcare"="hospital"]',
     ],
-    police: ['["amenity"="police"]'],
-    fire: ['["amenity"="fire_station"]'],
     ngo: [
       '["office"="ngo"]',
       '["office"="association"]',
