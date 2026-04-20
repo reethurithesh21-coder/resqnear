@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { UserLayout } from '@/components/user/UserLayout';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
 import { Icons } from '@/components/Icons';
 import { 
   Search, 
