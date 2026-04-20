@@ -19,17 +19,6 @@ export default function UserDashboard() {
   const [userName, setUserName] = useState<string>('');
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    if (!authLoading && !user) {
-      navigate('/auth?redirect=/dashboard');
-      return;
-    }
-
-    if (user) {
-      fetchUserData();
-    }
-  }, [user, authLoading, navigate]);
-
   const fetchUserData = async () => {
     if (!user) return;
     setLoading(true);
@@ -51,6 +40,17 @@ export default function UserDashboard() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (!authLoading && !user) {
+      navigate('/auth?redirect=/dashboard');
+      return;
+    }
+
+    if (user) {
+      fetchUserData();
+    }
+  }, [user, authLoading, navigate, fetchUserData]);
 
   if (authLoading || loading) {
     return (
