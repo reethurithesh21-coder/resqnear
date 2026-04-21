@@ -167,14 +167,6 @@ const Auth = () => {
       {/* Overlay for readability */}
       <div className="absolute inset-0 bg-background/70 backdrop-blur-sm" />
 
-      {/* Admin login link */}
-      <button
-        onClick={() => navigate('/admin/login')}
-        className="absolute top-6 right-6 text-xs text-muted-foreground hover:text-foreground transition-colors z-10 underline"
-      >
-        Admin Login
-      </button>
-
       <div className="w-full max-w-md z-10">
         {/* Branding */}
         <div className="text-center mb-8">
