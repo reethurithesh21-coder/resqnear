@@ -86,7 +86,7 @@ export default function UserDashboard() {
         </div>
 
         {/* Quick Actions */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <Button
             variant="outline"
             className="h-auto py-4 flex flex-col items-center gap-2"
@@ -106,16 +106,6 @@ export default function UserDashboard() {
               <Droplets className="h-5 w-5 text-blood" />
             </div>
             <span className="text-sm font-medium">Blood Donors</span>
-          </Button>
-          <Button
-            variant="outline"
-            className="h-auto py-4 flex flex-col items-center gap-2"
-            onClick={() => navigate('/saved')}
-          >
-            <div className="h-10 w-10 rounded-full bg-secondary/10 flex items-center justify-center">
-              <Bookmark className="h-5 w-5 text-secondary" />
-            </div>
-            <span className="text-sm font-medium">Saved Places</span>
           </Button>
           <Button
             variant="outline"
