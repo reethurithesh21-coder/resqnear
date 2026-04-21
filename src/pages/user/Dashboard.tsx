@@ -19,38 +19,41 @@ export default function UserDashboard() {
   const [userName, setUserName] = useState<string>('');
   const [loading, setLoading] = useState(true);
 
-  const fetchUserData = async () => {
-    if (!user) return;
-    setLoading(true);
-
-    try {
-      // Fetch profile
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('full_name')
-        .eq('user_id', user.id)
-        .single();
-
-      if (profile?.full_name) {
-        setUserName(profile.full_name);
-      }
-    } catch (error) {
-      console.error('Error fetching user data:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
-    if (!authLoading && !user) {
-      navigate('/auth?redirect=/dashboard');
+    if (authLoading) return;
+
+    if (!user) {
+      navigate('/auth?redirect=/dashboard', { replace: true });
       return;
     }
 
-    if (user) {
-      fetchUserData();
-    }
-  }, [user, authLoading, navigate, fetchUserData]);
+    let cancelled = false;
+
+    (async () => {
+      try {
+        const { data: profile, error } = await supabase
+          .from('profiles')
+          .select('full_name')
+          .eq('user_id', user.id)
+          .maybeSingle();
+
+        if (cancelled) return;
+        if (error) {
+          console.error('[Dashboard] profile fetch error:', error);
+        } else if (profile?.full_name) {
+          setUserName(profile.full_name);
+        }
+      } catch (err) {
+        console.error('[Dashboard] unexpected error:', err);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [user?.id, authLoading, navigate]);
 
   if (authLoading || loading) {
     return (
