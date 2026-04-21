@@ -11,6 +11,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { z } from 'zod';
 import { Heart, Mail, Lock, Eye, EyeOff, Loader2, User, ArrowLeft } from 'lucide-react';
+import hospitalBg from '@/assets/hospital-bg.jpg';
 
 const emailSchema = z.string().email('Please enter a valid email address');
 const passwordSchema = z.string().min(6, 'Password must be at least 6 characters');
@@ -159,11 +160,12 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center relative overflow-hidden bg-gradient-to-br from-primary/10 via-background to-accent/10 p-4">
-      {/* Decorative blobs */}
-      <div className="absolute top-0 left-0 w-72 h-72 bg-primary/20 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2 animate-pulse" />
-      <div className="absolute bottom-0 right-0 w-96 h-96 bg-accent/20 rounded-full blur-3xl translate-x-1/3 translate-y-1/3 animate-pulse" />
-      <div className="absolute top-1/2 left-1/2 w-64 h-64 bg-secondary/15 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2" />
+    <div
+      className="min-h-screen flex items-center justify-center relative overflow-hidden p-4 bg-cover bg-center"
+      style={{ backgroundImage: `url(${hospitalBg})` }}
+    >
+      {/* Overlay for readability */}
+      <div className="absolute inset-0 bg-background/70 backdrop-blur-sm" />
 
       {/* Admin login link */}
       <button

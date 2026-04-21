@@ -8,6 +8,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Icons } from '@/components/Icons';
 import { useToast } from '@/hooks/use-toast';
 import { Shield, Eye, EyeOff, Lock, Mail, ArrowLeft } from 'lucide-react';
+import hospitalBg from '@/assets/hospital-bg.jpg';
 
 export default function AdminLogin() {
   const [email, setEmail] = useState('');
@@ -65,13 +66,12 @@ export default function AdminLogin() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-primary/5 p-4 relative overflow-hidden">
-      {/* Decorative elements */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-80 h-80 rounded-full bg-primary/5 blur-3xl" />
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 rounded-full bg-primary/5 blur-3xl" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-primary/3 blur-3xl" />
-      </div>
+    <div
+      className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden bg-cover bg-center"
+      style={{ backgroundImage: `url(${hospitalBg})` }}
+    >
+      {/* Overlay for readability */}
+      <div className="absolute inset-0 bg-background/70 backdrop-blur-sm pointer-events-none" />
 
       <div className="w-full max-w-[420px] space-y-8 relative z-10">
         {/* Back button */}
