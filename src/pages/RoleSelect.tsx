@@ -3,13 +3,20 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Icons } from '@/components/Icons';
 import { User, Shield } from 'lucide-react';
+import hospitalBg from '@/assets/hospital-bg.jpg';
 
 export default function RoleSelect() {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-primary/5 p-4">
-      <div className="w-full max-w-3xl space-y-8">
+    <div
+      className="min-h-screen flex items-center justify-center p-4 relative bg-cover bg-center"
+      style={{ backgroundImage: `url(${hospitalBg})` }}
+    >
+      {/* Overlay for readability */}
+      <div className="absolute inset-0 bg-background/70 backdrop-blur-sm" />
+
+      <div className="w-full max-w-3xl space-y-8 relative z-10">
         {/* Branding */}
         <div className="text-center space-y-3">
           <div className="inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-primary shadow-lg">
