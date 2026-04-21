@@ -22,40 +22,36 @@ export default function RoleSelect() {
         </div>
 
         {/* Role cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-stretch">
           <Card
             onClick={() => navigate('/auth')}
-            className="p-8 cursor-pointer hover:border-primary hover:shadow-lg transition-all group"
+            className="p-8 cursor-pointer bg-card/40 backdrop-blur-md border-border/50 hover:border-primary hover:shadow-lg transition-all group flex flex-col"
           >
-            <div className="flex flex-col items-center text-center space-y-4">
+            <div className="flex flex-col items-center text-center h-full flex-1">
               <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
                 <User className="h-8 w-8 text-primary" />
               </div>
-              <div>
-                <h2 className="text-xl font-semibold">Continue as User</h2>
-                <p className="text-sm text-muted-foreground mt-1">
-                  Find nearby emergency services, hospitals & blood donors
-                </p>
-              </div>
-              <Button className="w-full mt-2">User Sign In</Button>
+              <h2 className="text-xl font-semibold mt-4">Continue as User</h2>
+              <p className="text-sm text-muted-foreground mt-1 min-h-[40px]">
+                Find nearby emergency services, hospitals & blood donors
+              </p>
+              <Button className="w-full mt-auto">User Sign In</Button>
             </div>
           </Card>
 
           <Card
             onClick={() => navigate('/admin/login')}
-            className="p-8 cursor-pointer hover:border-primary hover:shadow-lg transition-all group"
+            className="p-8 cursor-pointer bg-card/40 backdrop-blur-md border-border/50 hover:border-primary hover:shadow-lg transition-all group flex flex-col"
           >
-            <div className="flex flex-col items-center text-center space-y-4">
+            <div className="flex flex-col items-center text-center h-full flex-1">
               <div className="h-16 w-16 rounded-full bg-secondary/10 flex items-center justify-center group-hover:bg-secondary/20 transition-colors">
                 <Shield className="h-8 w-8 text-secondary" />
               </div>
-              <div>
-                <h2 className="text-xl font-semibold">Continue as Admin</h2>
-                <p className="text-sm text-muted-foreground mt-1">
-                  Manage services, donors and platform settings
-                </p>
-              </div>
-              <Button variant="outline" className="w-full mt-2">
+              <h2 className="text-xl font-semibold mt-4">Continue as Admin</h2>
+              <p className="text-sm text-muted-foreground mt-1 min-h-[40px]">
+                Manage services, donors and platform settings
+              </p>
+              <Button variant="outline" className="w-full mt-auto">
                 Admin Sign In
               </Button>
             </div>
