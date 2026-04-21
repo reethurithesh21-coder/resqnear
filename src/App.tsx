@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import Index from "./pages/Index";
+import RoleSelect from "./pages/RoleSelect";
 import Search from "./pages/Search";
 import HospitalFinder from "./pages/HospitalFinder";
 import BloodDonors from "./pages/BloodDonors";
@@ -36,7 +37,8 @@ const App = () => (
         <BrowserRouter>
           <Routes>
             {/* Public Routes */}
-            <Route path="/" element={<Auth />} />
+            <Route path="/" element={<RoleSelect />} />
+            <Route path="/auth" element={<Auth />} />
             <Route path="/reset-password" element={<ResetPassword />} />
             
             {/* Protected Routes */}
