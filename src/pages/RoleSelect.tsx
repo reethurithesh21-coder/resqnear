@@ -33,7 +33,7 @@ export default function RoleSelect() {
           <Card
             onClick={() => navigate('/auth')}
             className="p-8 cursor-pointer backdrop-blur-md border-border/50 hover:border-primary hover:shadow-lg transition-all group flex flex-col"
-            style={{ backgroundColor: 'hsl(150 40% 82% / 0.85)' }}
+            style={{ backgroundColor: 'hsl(40 60% 92% / 0.6)' }}
           >
             <div className="flex flex-col items-center text-center h-full flex-1">
               <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
