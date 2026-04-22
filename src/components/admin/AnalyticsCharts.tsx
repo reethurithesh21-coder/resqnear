@@ -80,7 +80,7 @@ export function AnalyticsCharts({ donorsByBloodGroup, registrationTrend, service
       </Card>
 
       {/* Blood Group Distribution */}
-      <Card>
+      <Card className="md:col-span-2">
         <CardHeader>
           <CardTitle>Donors by Blood Group</CardTitle>
         </CardHeader>
