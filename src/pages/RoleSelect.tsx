@@ -53,8 +53,8 @@ export default function RoleSelect() {
             style={{ backgroundColor: 'hsl(40 60% 92% / 0.6)' }}
           >
             <div className="flex flex-col items-center text-center h-full flex-1">
-              <div className="h-16 w-16 rounded-full bg-secondary/10 flex items-center justify-center group-hover:bg-secondary/20 transition-colors">
-                <Shield className="h-8 w-8 text-secondary" />
+              <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                <Shield className="h-8 w-8 text-primary" />
               </div>
               <h2 className="text-xl font-semibold mt-4">Continue as Admin</h2>
               <p className="text-sm text-muted-foreground mt-1 min-h-[40px]">
