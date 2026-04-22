@@ -184,8 +184,11 @@ const HospitalFinder = () => {
     }
   };
 
-  const openDirections = (lat: number, lng: number) => {
-    const url = `https://www.google.com/maps/dir/?api=1&origin=${latitude},${longitude}&destination=${lat},${lng}&travelmode=driving`;
+  const openDirections = (lat: number, lng: number, name?: string) => {
+    const destination = name
+      ? `${encodeURIComponent(name)}`
+      : `${lat},${lng}`;
+    const url = `https://www.google.com/maps/dir/?api=1&origin=${latitude},${longitude}&destination=${destination}&destination_place_id=&travelmode=driving`;
     window.open(url, '_blank', 'noopener,noreferrer');
   };
 
@@ -340,7 +343,7 @@ const HospitalFinder = () => {
                       className="h-8 text-xs"
                       onClick={(e) => {
                         e.stopPropagation();
-                        if (h.latitude && h.longitude) openDirections(h.latitude, h.longitude);
+                        if (h.latitude && h.longitude) openDirections(h.latitude, h.longitude, h.name);
                       }}
                     >
                       <Navigation className="h-3 w-3 mr-1" />
