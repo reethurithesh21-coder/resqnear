@@ -343,7 +343,7 @@ const HospitalFinder = () => {
                       className="h-8 text-xs"
                       onClick={(e) => {
                         e.stopPropagation();
-                        if (h.latitude && h.longitude) openDirections(h.latitude, h.longitude);
+                        if (h.latitude && h.longitude) openDirections(h.latitude, h.longitude, h.name);
                       }}
                     >
                       <Navigation className="h-3 w-3 mr-1" />
