@@ -118,35 +118,6 @@ export function AnalyticsCharts({ donorsByBloodGroup, registrationTrend, service
         </CardContent>
       </Card>
 
-      {/* Services by Category */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Services by Category</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="h-[300px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={servicesByCategory} layout="vertical">
-                <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                <XAxis type="number" className="text-xs" />
-                <YAxis dataKey="name" type="category" className="text-xs" width={80} />
-                <Tooltip 
-                  contentStyle={{ 
-                    backgroundColor: 'hsl(var(--card))', 
-                    border: '1px solid hsl(var(--border))',
-                    borderRadius: '8px'
-                  }} 
-                />
-                <Bar dataKey="count" name="Count" radius={[0, 4, 4, 0]}>
-                  {servicesByCategory.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={CATEGORY_COLORS[index % CATEGORY_COLORS.length]} />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
 }
