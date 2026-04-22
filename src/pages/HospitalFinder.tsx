@@ -98,12 +98,16 @@ const HospitalFinder = () => {
     setLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke('search-places', {
-        body: { latitude, longitude, category: 'hospital', radius: 10000 },
+        body: { latitude, longitude, category: 'hospital', radius: 15000 },
       });
       if (error) throw error;
       const results: EmergencyService[] = data?.services || [];
       setHospitals(results);
-      if (results.length === 0) toast.info('No hospitals found nearby.');
+      if (results.length === 0) {
+        toast.info('No hospitals found within 50km of your location.');
+      } else {
+        toast.success(`Found ${results.length} hospital${results.length > 1 ? 's' : ''} near you`);
+      }
     } catch (err: any) {
       console.error('Hospital fetch error:', err);
       toast.error('Failed to fetch nearby hospitals.');
