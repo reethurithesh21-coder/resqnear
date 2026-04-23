@@ -4,6 +4,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { Icons } from '@/components/Icons';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { ThemeToggle } from '@/components/ThemeToggle';
 import { cn } from '@/lib/utils';
 import { 
   LayoutDashboard, 
@@ -135,7 +136,7 @@ export function UserLayout({ children }: UserLayoutProps) {
       </aside>
 
       {/* Mobile Header & Sidebar */}
-      <div className="md:hidden fixed top-0 left-0 right-0 z-50 bg-card border-b">
+      <div className="md:hidden fixed top-0 left-0 right-0 z-50 bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/80 border-b">
         <div className="flex items-center justify-between p-4">
           <Link to="/home" className="flex items-center gap-2">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
@@ -143,16 +144,19 @@ export function UserLayout({ children }: UserLayoutProps) {
             </div>
             <span className="font-bold text-foreground">ResQNear</span>
           </Link>
-          <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
-            <SheetTrigger asChild>
-              <Button variant="ghost" size="icon">
-                <Menu className="h-5 w-5" />
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="left" className="w-72 p-0">
-              <SidebarContent mobile />
-            </SheetContent>
-          </Sheet>
+          <div className="flex items-center gap-1">
+            <ThemeToggle />
+            <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon">
+                  <Menu className="h-5 w-5" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="left" className="w-72 p-0">
+                <SidebarContent mobile />
+              </SheetContent>
+            </Sheet>
+          </div>
         </div>
       </div>
 
