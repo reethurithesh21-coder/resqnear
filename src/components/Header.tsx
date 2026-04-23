@@ -7,6 +7,7 @@ import { useAdmin } from '@/hooks/useAdmin';
 import { useState } from 'react';
 import { Settings, ArrowLeft } from 'lucide-react';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
+import { ThemeToggle } from '@/components/ThemeToggle';
 import { useLanguage } from '@/i18n/LanguageContext';
 
 export function Header() {
@@ -66,6 +67,7 @@ export function Header() {
 
         {/* Desktop Auth + Language */}
         <div className="hidden md:flex items-center gap-2">
+          <ThemeToggle />
           <LanguageSwitcher />
           {isAdmin && (
             <Button variant="outline" size="sm" asChild>
@@ -97,6 +99,7 @@ export function Header() {
 
         {/* Mobile Menu */}
         <div className="flex md:hidden items-center gap-1">
+          <ThemeToggle />
           <LanguageSwitcher />
           <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
             <SheetTrigger asChild>
