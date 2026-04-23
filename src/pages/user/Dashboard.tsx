@@ -87,36 +87,33 @@ export default function UserDashboard() {
 
         {/* Quick Actions */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <Button
-            variant="outline"
-            className="h-auto py-4 flex flex-col items-center gap-2"
+          <button
             onClick={() => navigate('/search')}
+            className="group h-auto py-6 px-4 rounded-xl border border-primary/20 bg-transparent hover:bg-primary/5 hover:border-primary/40 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 flex flex-col items-center gap-2 cursor-pointer"
           >
-            <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+            <div className="h-11 w-11 rounded-full bg-primary/10 group-hover:bg-primary/20 flex items-center justify-center transition-colors">
               <Search className="h-5 w-5 text-primary" />
             </div>
-            <span className="text-sm font-medium">Find Services</span>
-          </Button>
-          <Button
-            variant="outline"
-            className="h-auto py-4 flex flex-col items-center gap-2"
+            <span className="text-sm font-semibold text-foreground">Find Services</span>
+          </button>
+          <button
             onClick={() => navigate('/blood-donors')}
+            className="group h-auto py-6 px-4 rounded-xl border border-blood/20 bg-transparent hover:bg-blood/5 hover:border-blood/40 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 flex flex-col items-center gap-2 cursor-pointer"
           >
-            <div className="h-10 w-10 rounded-full bg-blood/10 flex items-center justify-center">
+            <div className="h-11 w-11 rounded-full bg-blood/10 group-hover:bg-blood/20 flex items-center justify-center transition-colors">
               <Droplets className="h-5 w-5 text-blood" />
             </div>
-            <span className="text-sm font-medium">Blood Donors</span>
-          </Button>
-          <Button
-            variant="outline"
-            className="h-auto py-4 flex flex-col items-center gap-2 border-emergency text-emergency hover:bg-emergency/10"
+            <span className="text-sm font-semibold text-foreground">Blood Donors</span>
+          </button>
+          <button
             onClick={() => window.location.href = 'tel:112'}
+            className="group h-auto py-6 px-4 rounded-xl border border-emergency/30 bg-transparent hover:bg-emergency/5 hover:border-emergency/50 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 flex flex-col items-center gap-2 cursor-pointer"
           >
-            <div className="h-10 w-10 rounded-full bg-emergency/10 flex items-center justify-center">
+            <div className="h-11 w-11 rounded-full bg-emergency/10 group-hover:bg-emergency/20 flex items-center justify-center transition-colors">
               <Phone className="h-5 w-5 text-emergency" />
             </div>
-            <span className="text-sm font-medium">Emergency</span>
-          </Button>
+            <span className="text-sm font-semibold text-emergency">Emergency</span>
+          </button>
         </div>
       </div>
     </UserLayout>
