@@ -1,107 +1,95 @@
-import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useState, useMemo } from 'react';
 import { UserLayout } from '@/components/user/UserLayout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
 import { Icons } from '@/components/Icons';
-import { SavedLocation } from '@/types';
-import { MapPin, Phone, Trash2, Search, Navigation } from 'lucide-react';
+import { Hospital, Phone, Search, Navigation, MapPin } from 'lucide-react';
 
-export default function SavedLocationsPage() {
-  const navigate = useNavigate();
-  const { user, loading: authLoading } = useAuth();
-  const { toast } = useToast();
-  
-  const [locations, setLocations] = useState<SavedLocation[]>([]);
+interface EmergencyService {
+  id: string;
+  name: string;
+  category: string;
+  address: string;
+  phone: string | null;
+  latitude: number | null;
+  longitude: number | null;
+  is_active: boolean;
+}
+
+// Extract a city token from a free-text address. We take the last comma-separated
+// segment that isn't purely digits (postal code) as a best-effort city name.
+function extractCity(address: string): string {
+  if (!address) return '';
+  const parts = address.split(',').map(p => p.trim()).filter(Boolean);
+  for (let i = parts.length - 1; i >= 0; i--) {
+    const p = parts[i].replace(/\d{4,}/g, '').trim();
+    if (p) return p;
+  }
+  return parts[parts.length - 1] || '';
+}
+
+export default function EmergencyServicesPage() {
+  const [services, setServices] = useState<EmergencyService[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
 
   useEffect(() => {
-    if (!authLoading && !user) {
-      navigate('/auth?redirect=/saved');
-      return;
-    }
+    fetchServices();
+  }, []);
 
-    if (user) {
-      fetchLocations();
-    }
-  }, [user, authLoading, navigate]);
-
-  const fetchLocations = async () => {
-    if (!user) return;
-
+  const fetchServices = async () => {
     try {
       const { data, error } = await supabase
-        .from('saved_locations')
+        .from('emergency_services')
         .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false });
+        .eq('is_active', true)
+        .eq('category', 'hospital')
+        .order('name');
 
       if (error) throw error;
-      setLocations(data as SavedLocation[]);
+      setServices((data || []) as EmergencyService[]);
     } catch (error) {
-      console.error('Error fetching locations:', error);
+      console.error('Error fetching emergency services:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleDelete = async (id: string) => {
-    try {
-      const { error } = await supabase
-        .from('saved_locations')
-        .delete()
-        .eq('id', id);
-
-      if (error) throw error;
-
-      setLocations(prev => prev.filter(loc => loc.id !== id));
-      toast({
-        title: 'Location removed',
-        description: 'The saved location has been removed.',
-      });
-    } catch (error: any) {
-      toast({
-        title: 'Error',
-        description: 'Failed to remove location.',
-        variant: 'destructive',
-      });
-    }
-  };
-
-  const handleNavigate = (location: SavedLocation) => {
-    if (location.latitude && location.longitude) {
-      window.open(
-        `https://www.google.com/maps/dir/?api=1&destination=${location.latitude},${location.longitude}`,
-        '_blank'
+  const filteredServices = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return services;
+    return services.filter(s => {
+      const city = extractCity(s.address).toLowerCase();
+      return (
+        city.includes(q) ||
+        s.address?.toLowerCase().includes(q) ||
+        s.name.toLowerCase().includes(q)
       );
-    }
+    });
+  }, [services, search]);
+
+  // Group by city for nicer presentation
+  const grouped = useMemo(() => {
+    const map = new Map<string, EmergencyService[]>();
+    filteredServices.forEach(s => {
+      const city = extractCity(s.address) || 'Other';
+      if (!map.has(city)) map.set(city, []);
+      map.get(city)!.push(s);
+    });
+    return Array.from(map.entries()).sort(([a], [b]) => a.localeCompare(b));
+  }, [filteredServices]);
+
+  const handleNavigate = (s: EmergencyService) => {
+    const dest = s.latitude && s.longitude
+      ? `${encodeURIComponent(s.name)}/@${s.latitude},${s.longitude}`
+      : encodeURIComponent(`${s.name} ${s.address}`);
+    window.open(`https://www.google.com/maps/dir/?api=1&destination=${dest}`, '_blank');
   };
 
-  const filteredLocations = locations.filter(
-    loc =>
-      loc.name.toLowerCase().includes(search.toLowerCase()) ||
-      loc.address?.toLowerCase().includes(search.toLowerCase()) ||
-      loc.category.toLowerCase().includes(search.toLowerCase())
-  );
-
-  const getCategoryColor = (category: string) => {
-    const colors: Record<string, string> = {
-      hospital: 'bg-primary/10 text-primary',
-      ambulance: 'bg-emergency/10 text-emergency',
-      police: 'bg-blue-100 text-blue-700',
-      fire: 'bg-orange-100 text-orange-700',
-      ngo: 'bg-secondary/10 text-secondary',
-    };
-    return colors[category] || 'bg-muted text-muted-foreground';
-  };
-
-  if (authLoading || loading) {
+  if (loading) {
     return (
       <UserLayout>
         <div className="flex justify-center items-center py-24">
@@ -113,11 +101,11 @@ export default function SavedLocationsPage() {
 
   return (
     <UserLayout>
-      <div className="space-y-6 max-w-4xl">
+      <div className="space-y-6 max-w-5xl">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold">Saved Locations</h1>
+          <h1 className="text-2xl md:text-3xl font-bold">Emergency Services</h1>
           <p className="text-muted-foreground">
-            Quick access to your saved emergency services
+            Hospitals registered by administrators — search by city or name
           </p>
         </div>
 
@@ -125,15 +113,15 @@ export default function SavedLocationsPage() {
           <CardHeader>
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div>
-                <CardTitle>All Saved Places ({locations.length})</CardTitle>
+                <CardTitle>Available Hospitals ({filteredServices.length})</CardTitle>
                 <CardDescription>
-                  Locations you've saved for quick access
+                  Find verified hospitals and contact them directly
                 </CardDescription>
               </div>
-              <div className="relative w-full md:w-64">
+              <div className="relative w-full md:w-72">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="Search locations..."
+                  placeholder="Search by city or hospital name..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   className="pl-9"
@@ -142,81 +130,72 @@ export default function SavedLocationsPage() {
             </div>
           </CardHeader>
           <CardContent>
-            {filteredLocations.length === 0 ? (
+            {filteredServices.length === 0 ? (
               <div className="text-center py-12">
-                <MapPin className="h-16 w-16 mx-auto mb-4 text-muted-foreground opacity-50" />
+                <Hospital className="h-16 w-16 mx-auto mb-4 text-muted-foreground opacity-50" />
                 {search ? (
                   <>
-                    <p className="text-lg font-medium mb-2">No matching locations</p>
-                    <p className="text-muted-foreground mb-4">
-                      Try a different search term
+                    <p className="text-lg font-medium mb-2">No hospitals found</p>
+                    <p className="text-muted-foreground">
+                      Try a different city or hospital name
                     </p>
                   </>
                 ) : (
                   <>
-                    <p className="text-lg font-medium mb-2">No saved locations yet</p>
-                    <p className="text-muted-foreground mb-4">
-                      Search for emergency services and save them for quick access
+                    <p className="text-lg font-medium mb-2">No hospitals available yet</p>
+                    <p className="text-muted-foreground">
+                      Administrators haven't added any hospitals. Please check back later.
                     </p>
-                    <Button onClick={() => navigate('/search')}>
-                      Find Services
-                    </Button>
                   </>
                 )}
               </div>
             ) : (
-              <div className="space-y-3">
-                {filteredLocations.map((location) => (
-                  <div 
-                    key={location.id} 
-                    className="flex items-start gap-4 p-4 rounded-lg border hover:bg-muted/50 transition-colors"
-                  >
-                    <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                      <MapPin className="h-6 w-6 text-primary" />
+              <div className="space-y-6">
+                {grouped.map(([city, items]) => (
+                  <div key={city} className="space-y-3">
+                    <div className="flex items-center gap-2">
+                      <MapPin className="h-4 w-4 text-primary" />
+                      <h3 className="font-semibold text-foreground">{city}</h3>
+                      <Badge variant="secondary" className="ml-1">{items.length}</Badge>
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-start gap-2 mb-1">
-                        <h3 className="font-semibold truncate">{location.name}</h3>
-                        <Badge className={getCategoryColor(location.category)} variant="secondary">
-                          {location.category}
-                        </Badge>
-                      </div>
-                      {location.address && (
-                        <p className="text-sm text-muted-foreground mb-2 line-clamp-2">
-                          {location.address}
-                        </p>
-                      )}
-                      <div className="flex flex-wrap gap-2">
-                        {location.phone && (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => window.location.href = `tel:${location.phone}`}
-                          >
-                            <Phone className="h-4 w-4 mr-1" />
-                            Call
-                          </Button>
-                        )}
-                        {location.latitude && location.longitude && (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleNavigate(location)}
-                          >
-                            <Navigation className="h-4 w-4 mr-1" />
-                            Directions
-                          </Button>
-                        )}
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="text-destructive hover:text-destructive"
-                          onClick={() => handleDelete(location.id)}
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      {items.map((s) => (
+                        <div
+                          key={s.id}
+                          className="flex items-start gap-3 p-4 rounded-lg border bg-card hover:bg-muted/40 transition-colors"
                         >
-                          <Trash2 className="h-4 w-4 mr-1" />
-                          Remove
-                        </Button>
-                      </div>
+                          <div className="h-11 w-11 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                            <Hospital className="h-6 w-6 text-primary" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h4 className="font-semibold truncate">{s.name}</h4>
+                            <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
+                              {s.address}
+                            </p>
+                            <div className="flex flex-wrap gap-2">
+                              {s.phone && (
+                                <Button
+                                  size="sm"
+                                  onClick={() => (window.location.href = `tel:${s.phone}`)}
+                                >
+                                  <Phone className="h-4 w-4 mr-1" />
+                                  Call
+                                </Button>
+                              )}
+                              {(s.latitude && s.longitude) || s.address ? (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => handleNavigate(s)}
+                                >
+                                  <Navigation className="h-4 w-4 mr-1" />
+                                  Directions
+                                </Button>
+                              ) : null}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   </div>
                 ))}

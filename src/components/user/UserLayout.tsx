@@ -9,7 +9,7 @@ import {
   LayoutDashboard, 
   Search, 
   Droplets, 
-  Bookmark, 
+  Hospital, 
   User, 
   Settings,
   Menu,
@@ -27,7 +27,7 @@ const navItems = [
   { title: 'Dashboard', url: '/dashboard', icon: LayoutDashboard },
   { title: 'Find Services', url: '/search', icon: Search },
   { title: 'Blood Donors', url: '/blood-donors', icon: Droplets },
-  { title: 'Saved Locations', url: '/saved', icon: Bookmark },
+  { title: 'Emergency Services', url: '/saved', icon: Hospital },
   { title: 'My Profile', url: '/profile', icon: User },
   { title: 'Settings', url: '/settings', icon: Settings },
 ];
