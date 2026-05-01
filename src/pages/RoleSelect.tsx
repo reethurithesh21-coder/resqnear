@@ -14,7 +14,7 @@ export default function RoleSelect() {
       style={{ backgroundImage: `url(${hospitalBg})` }}
     >
       {/* Overlay for readability */}
-      <div className="absolute inset-0 bg-background/70 backdrop-blur-sm" />
+      <div className="absolute inset-0 bg-background/90 backdrop-blur-md" />
 
       <div className="w-full max-w-3xl space-y-8 relative z-10">
         {/* Branding */}
@@ -32,8 +32,7 @@ export default function RoleSelect() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-stretch">
           <Card
             onClick={() => navigate('/auth')}
-            className="p-8 cursor-pointer backdrop-blur-md border-border/50 hover:border-primary hover:shadow-lg transition-all group flex flex-col"
-            style={{ backgroundColor: 'hsl(40 60% 92% / 0.6)' }}
+            className="p-8 cursor-pointer bg-card border-border hover:border-primary hover:shadow-lg transition-all group flex flex-col"
           >
             <div className="flex flex-col items-center text-center h-full flex-1">
               <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
@@ -49,8 +48,7 @@ export default function RoleSelect() {
 
           <Card
             onClick={() => navigate('/admin/login')}
-            className="p-8 cursor-pointer backdrop-blur-md border-border/50 hover:border-primary hover:shadow-lg transition-all group flex flex-col"
-            style={{ backgroundColor: 'hsl(40 60% 92% / 0.6)' }}
+            className="p-8 cursor-pointer bg-card border-border hover:border-primary hover:shadow-lg transition-all group flex flex-col"
           >
             <div className="flex flex-col items-center text-center h-full flex-1">
               <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
