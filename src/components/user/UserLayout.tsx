@@ -30,7 +30,7 @@ const navItems = [
   { title: 'Blood Donors', url: '/blood-donors', icon: Droplets },
   { title: 'Emergency Services', url: '/saved', icon: Hospital },
   { title: 'My Profile', url: '/profile', icon: User },
-  { title: 'Settings', url: '/settings', icon: Settings },
+  
 ];
 
 export function UserLayout({ children }: UserLayoutProps) {
